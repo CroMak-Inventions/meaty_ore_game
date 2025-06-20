@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::render::camera::CameraProjection;
 
 use crate::collision_detection::Collider;
+use crate::schedule::InGameSet;
 
 use super::asset_loader::SceneAssets;
 use super::movement::{Acceleration, Velocity, MovingObjectBundle, SceneBundle};
@@ -25,6 +26,9 @@ const MISSILE_RADIUS: f32 = 0.5;
 pub struct Spaceship;
 
 #[derive(Component, Debug)]
+pub struct SpaceshipShield;
+
+#[derive(Component, Debug)]
 pub struct SpaceshipMissile;
 
 #[derive(Resource, Debug)]
@@ -44,10 +48,17 @@ impl Plugin for SpaceshipPlugin {
             )
         })
         .add_systems(PostStartup, spawn_spaceship)
-        .add_systems(Update, (
+        .add_systems(Update,
+            (
                 spaceship_movement_controls,
-                spawn_missles,
-                despawn_missles
+                spaceship_weapon_controls,
+                spaceship_shield_controls,
+            )
+            .chain()
+            .in_set(InGameSet::UserInput)
+        )
+        .add_systems(Update, (
+                despawn_missles,
         ));
     }
 }
@@ -72,7 +83,10 @@ fn spaceship_movement_controls(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    let (mut transform, mut velocity) = query.single_mut().unwrap();
+    let Ok((mut transform, mut velocity)) = query.single_mut() else {
+        return;
+    };
+
     let mut rotation = 0.0;
     let mut roll = 0.0;
     let mut movement = 0.0;
@@ -114,7 +128,7 @@ fn spaceship_movement_controls(
 }
 
 
-fn spawn_missles(
+fn spaceship_weapon_controls(
     mut commands: Commands,
     mut rate_timer: ResMut<MissileRateTimer>,
     time: Res<Time>,
@@ -125,7 +139,10 @@ fn spawn_missles(
 ) {
     rate_timer.timer.tick(time.delta());
 
-    let transform = query.single().unwrap();
+    let Ok(transform) = query.single() else {
+        return;
+    };
+
     let mut missile_xform = Transform::from_translation(
         transform.translation + -transform.forward() * MISSILE_FORWARD_SPAWN_SCALAR,
     );
@@ -156,6 +173,22 @@ fn spawn_missles(
 
     }
 }
+
+
+fn spaceship_shield_controls(
+    mut commands: Commands,
+    query: Query<Entity, With<Spaceship>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    let Ok(spaceship) = query.single() else {
+        return;
+    };
+
+    if keyboard_input.pressed(KeyCode::Tab) {
+        commands.entity(spaceship).insert(SpaceshipShield);
+    }
+}
+
 
 fn despawn_missles(
     mut commands: Commands,

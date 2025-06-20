@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::collision_detection::Collider;
+use crate::schedule::InGameSet;
 
 use super::asset_loader::SceneAssets;
 use super::movement::{Acceleration, Velocity, MovingObjectBundle, SceneBundle};
@@ -37,10 +38,10 @@ impl Plugin for AsteroidPlugin {
             )
         })
         .add_systems(Update, (
-            spawn_asteroid,
-            rotate_asteroids,
-            handle_asteroid_collisions,
-        ));
+                spawn_asteroid,
+                rotate_asteroids,
+            ).in_set(InGameSet::EntityUpdates),
+        );
     }
 }
 
@@ -93,25 +94,5 @@ fn rotate_asteroids(
 ) {
     for mut transform in query.iter_mut() {
         transform.rotate_local_z(ROTATE_SPEED * time.delta_secs());
-    }
-}
-
-fn handle_asteroid_collisions(
-    mut commands: Commands,
-    query: Query<(Entity, &Collider), With<Asteroid>>,
-) {
-    for (entity, collider) in query.iter() {
-        for  &collided_entity in collider.colliding_entities.iter() {
-            if query.get(collided_entity).is_ok() {
-                // Asteroid collided with another Asteroid
-                continue;
-            }
-
-            // Despawn the asteroid
-            commands.entity(entity).despawn();
-
-            // Despawn the other object
-            commands.entity(collided_entity).despawn();
-        }
     }
 }
