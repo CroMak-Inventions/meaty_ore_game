@@ -8,6 +8,8 @@ mod camera;
 mod collision_detection;
 mod despawn;
 mod schedule;
+mod state;
+mod health;
 mod debug;
 
 
@@ -19,6 +21,7 @@ use camera::CameraPlugin;
 use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
 use schedule::SchedulePlugin;
+use state::StatePlugin;
 use debug::DebugPlugin;
 
 fn main() {
@@ -41,6 +44,7 @@ fn main() {
             CollisionDetectionPlugin,
             DespawnPlugin,
             SchedulePlugin,
+            StatePlugin,
             DebugPlugin,
         ))
         .run();

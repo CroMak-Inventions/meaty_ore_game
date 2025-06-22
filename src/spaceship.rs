@@ -1,25 +1,31 @@
 use bevy::prelude::*;
 use bevy::render::camera::CameraProjection;
 
-use crate::collision_detection::Collider;
-use crate::schedule::InGameSet;
-
-use super::asset_loader::SceneAssets;
-use super::movement::{Acceleration, Velocity, MovingObjectBundle, SceneBundle};
+use crate::{
+    asset_loader::SceneAssets,
+    collision_detection::{Collider, CollisionDamage},
+    health::Health,
+    movement::{Acceleration, MovingObjectBundle, SceneBundle, Velocity},
+    schedule::InGameSet, state::GameState,
+};
 
 
 const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+const SPACESHIP_RADIUS: f32 = 2.5;
 const SPACESHIP_SPEED: f32 = 25.0;
 const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
 const SPACESHIP_ROLL_SPEED: f32 = 2.5;
-const SPACESHIP_RADIUS: f32 = 2.5;
+const SPACESHIP_HEALTH: f32 = 100.0;
+const SPACESHIP_COLLISION_DAMAGE: f32 = 100.0;
 
 const MISSILE_SPEED: f32 = 50.0;
 const MISSILE_RATE: f32 = 4.0;  // shots per second
 const MISSILE_MAX: usize = 3;  // maximum number of missiles allowed in the air
 const MISSILE_FORWARD_SPAWN_SCALAR: f32 = 7.5;
 const MISSILE_RADIUS: f32 = 0.5;
+const MISSILE_HEALTH: f32 = 1.0;
+const MISSILE_COLLISION_DAMAGE: f32 = 5.0;
 
 
 #[derive(Component, Debug)]
@@ -48,6 +54,7 @@ impl Plugin for SpaceshipPlugin {
             )
         })
         .add_systems(PostStartup, spawn_spaceship)
+        .add_systems(OnEnter(GameState::GameOver), spawn_spaceship)
         .add_systems(Update,
             (
                 spaceship_movement_controls,
@@ -57,9 +64,11 @@ impl Plugin for SpaceshipPlugin {
             .chain()
             .in_set(InGameSet::UserInput)
         )
-        .add_systems(Update, (
-                despawn_missles,
-        ));
+        .add_systems(Update,
+            spaceship_destroyed.in_set(InGameSet::EntityUpdates))
+        .add_systems(Update,
+            despawn_missles.in_set(InGameSet::DespawnEntities),
+        );
     }
 }
 
@@ -74,7 +83,9 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
                 transform: Transform::from_translation(STARTING_TRANSLATION),
             }
         },
-        Spaceship
+        Spaceship,
+        Health::new(SPACESHIP_HEALTH),
+        CollisionDamage::new(SPACESHIP_COLLISION_DAMAGE),
     ));
 }
 
@@ -168,6 +179,8 @@ fn spaceship_weapon_controls(
                     },
                 },
                 SpaceshipMissile,
+                Health::new(MISSILE_HEALTH),
+                CollisionDamage::new(MISSILE_COLLISION_DAMAGE),
             ));
         }
 
@@ -222,4 +235,13 @@ fn despawn_missles(
         }
     }
 
+}
+
+fn spaceship_destroyed(
+    mut next_state: ResMut<NextState<GameState>>,
+    query: Query<(), With<Spaceship>>,
+) {
+    if query.single().is_err() {
+        next_state.set(GameState::GameOver);
+    }
 }
