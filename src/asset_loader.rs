@@ -5,6 +5,8 @@ pub struct SceneAssets {
     pub asteroid: Handle<Scene>,
     pub spaceship: Handle<Scene>,
     pub missiles: Handle<Scene>,
+    pub shooting_sound: Handle<AudioSource>,
+    pub background_music: Handle<AudioSource>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -23,7 +25,8 @@ fn load_assets(
     *scene_assets = SceneAssets {
         asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
         spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Spaceship.glb")),
-        //missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Missile.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
+        shooting_sound: asset_server.load("sound/shoot.ogg"),
+        background_music: asset_server.load("sound/CryforMercyButtheClockTicksDown.ogg"),
     }
 }

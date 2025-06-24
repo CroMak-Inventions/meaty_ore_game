@@ -10,6 +10,8 @@ mod despawn;
 mod schedule;
 mod state;
 mod health;
+mod sound_fx;
+mod ambient_sound;
 mod debug;
 
 
@@ -22,6 +24,8 @@ use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
 use schedule::SchedulePlugin;
 use state::StatePlugin;
+use sound_fx::SoundFXPlugin;
+use ambient_sound::AmbientSoundPlugin;
 use debug::DebugPlugin;
 
 fn main() {
@@ -45,6 +49,8 @@ fn main() {
             DespawnPlugin,
             SchedulePlugin,
             StatePlugin,
+            SoundFXPlugin,
+            AmbientSoundPlugin,
             DebugPlugin,
         ))
         .run();

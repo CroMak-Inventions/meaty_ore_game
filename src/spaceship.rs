@@ -7,6 +7,7 @@ use crate::{
     health::Health,
     movement::{Acceleration, MovingObjectBundle, SceneBundle, Velocity},
     schedule::InGameSet, state::GameState,
+    sound_fx::ShootingSoundEvent,
 };
 
 
@@ -146,6 +147,7 @@ fn spaceship_weapon_controls(
     query: Query<&Transform, With<Spaceship>>,
     missile_query: Query<(), With<SpaceshipMissile>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut sound_event_writer: EventWriter<ShootingSoundEvent>,
     scene_assets: Res<SceneAssets>,
 ) {
     rate_timer.timer.tick(time.delta());
@@ -168,7 +170,7 @@ fn spaceship_weapon_controls(
         if missile_number < MISSILE_MAX {
             rate_timer.timer.reset();
 
-            commands.spawn((
+            let entity_commands = commands.spawn((
                 MovingObjectBundle {
                     velocity: Velocity::new(-transform.forward() * MISSILE_SPEED),
                     acceleration: Acceleration::new(Vec3::ZERO),
@@ -182,8 +184,11 @@ fn spaceship_weapon_controls(
                 Health::new(MISSILE_HEALTH),
                 CollisionDamage::new(MISSILE_COLLISION_DAMAGE),
             ));
-        }
 
+            sound_event_writer.write(ShootingSoundEvent::new(
+                entity_commands.id()
+            ));
+        }
     }
 }
 

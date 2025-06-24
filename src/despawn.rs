@@ -1,6 +1,11 @@
 use bevy::prelude::*;
 
-use crate::{health::Health, schedule::InGameSet, state::GameState};
+use crate::{
+    health::Health,
+    schedule::InGameSet,
+    state::GameState,
+    sound_fx::GameSoundEffects,
+};
 
 const DESPAWN_DISTANCE: f32 = 100.0;
 
@@ -12,7 +17,8 @@ impl Plugin for DespawnPlugin {
             Update,
             (
                 despawn_far_away_entities,
-                despawn_dead_entities
+                despawn_dead_entities,
+                despawn_old_audiosink_entities,
             ).in_set(InGameSet::DespawnEntities),
         )
         .add_systems(
@@ -52,5 +58,25 @@ fn despawn_all_entities(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
+    }
+}
+
+fn despawn_old_audiosink_entities(
+    mut commands: Commands,
+    query: Query<(Entity, &AudioSink), With<GameSoundEffects>>,
+) {
+    // Well, this kinda sux from a perspective of resource reuse.
+    // Apparently the Audiosink component can only play the audio it is
+    // connected to one time.  No rewind, No replay.  Curiously there is an
+    // audio loop configuration, where the audio can loop.  So I don't really
+    // understand why the audio can't be replayed, if it can be looped.
+    //
+    // So the strategy for sound effects is that a new AudioSink component
+    // needs to be spawned every time we want something to make a sound.
+    // .....Well......OK.....
+    for (entity, audio_sink) in query.iter() {
+        if audio_sink.empty() {
+            commands.entity(entity).despawn();
+        }
     }
 }
