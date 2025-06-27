@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{asset_loader::SceneAssets, schedule::InGameSet};
+use crate::asset_loader::SceneAssets;
 
 #[derive(Component, Debug)]
 pub struct GameAmbientSound;

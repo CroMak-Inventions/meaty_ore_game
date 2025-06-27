@@ -4,7 +4,8 @@ use crate::{
     asteroids::Asteroid,
     health::Health,
     schedule::InGameSet,
-    spaceship::{Spaceship, SpaceshipMissile}
+    sound_fx::MeteorCollisionSoundEvent,
+    spaceship::{Spaceship, SpaceshipMissile},
 };
 
 
@@ -113,6 +114,7 @@ fn collision_detection(
 
 fn handle_collisions<T: Component>(
     mut collision_event_writer: EventWriter<CollisionEvent>,
+    mut sound_event_writer: EventWriter<MeteorCollisionSoundEvent>,
     query: Query<(Entity, &Collider), With<T>>
 ) {
     for (entity, collider) in query.iter() {
@@ -126,6 +128,8 @@ fn handle_collisions<T: Component>(
                 entity,
                 collided_entity,
             ));
+
+            sound_event_writer.write(MeteorCollisionSoundEvent);
         }
     }
 }
