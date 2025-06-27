@@ -11,6 +11,8 @@ out in the videos there are a couple of extra features that have been added.
 - There is a maximum of 3 missiles allowed on the screen at any given time.
 - In the event of a collision, the missile is despawned as well as the
   asteroid.
+- Sound effects for shooting and hitting the meteors.
+- Ambient music in the background.
 
 ## Proposed Features
 
