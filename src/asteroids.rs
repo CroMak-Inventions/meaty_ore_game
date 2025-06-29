@@ -26,8 +26,28 @@ const COLLISION_DAMAGE: f32 = 35.0;
 pub struct Asteroid;
 
 #[derive(Resource, Debug)]
-pub struct SpawnTimer {
+pub struct AsteroidSpawnTimer {
     timer: Timer,
+}
+
+#[derive(Component, Debug)]
+pub struct AsteroidDebris;
+
+#[derive(Event, Debug)]
+pub struct AsteroidCollisionAnimationEvent {
+    pub xform: Transform,
+    pub velocity: Velocity,
+    pub acceleration: Acceleration,
+}
+
+impl AsteroidCollisionAnimationEvent {
+    pub fn new(xform: &Transform, velocity: &Velocity, acceleration: &Acceleration) -> Self {
+        Self {
+            xform: xform.clone(),
+            velocity: velocity.clone(),
+            acceleration: acceleration.clone(),
+        }
+    }
 }
 
 
@@ -35,7 +55,7 @@ pub struct AsteroidPlugin;
 
 impl Plugin for AsteroidPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(SpawnTimer {
+        app.insert_resource(AsteroidSpawnTimer {
             timer: Timer::from_seconds(
                 SPAWN_TIME_SECONDS,
                 TimerMode::Repeating
@@ -44,14 +64,16 @@ impl Plugin for AsteroidPlugin {
         .add_systems(Update, (
                 spawn_asteroid,
                 rotate_asteroids,
+                spawn_collision_animation,
             ).in_set(InGameSet::EntityUpdates),
-        );
+        )
+        .add_event::<AsteroidCollisionAnimationEvent>();
     }
 }
 
 fn spawn_asteroid(
     mut commands: Commands,
-    mut spawn_timer: ResMut<SpawnTimer>,
+    mut spawn_timer: ResMut<AsteroidSpawnTimer>,
     time: Res<Time>,
     scene_assets: Res<SceneAssets>,
 ) {
@@ -100,5 +122,35 @@ fn rotate_asteroids(
 ) {
     for mut transform in query.iter_mut() {
         transform.rotate_local_z(ROTATE_SPEED * time.delta_secs());
+    }
+}
+
+fn spawn_collision_animation(
+    mut animation_event_reader: EventReader<AsteroidCollisionAnimationEvent>,
+    mut commands: Commands,
+    scene_assets: Res<SceneAssets>,
+) {
+    for &AsteroidCollisionAnimationEvent {
+        xform,
+        ref velocity,
+        ref acceleration,
+    } in animation_event_reader.read() {
+        let mut rng = rand::rng();
+
+        let mut debris_velocity = Velocity::from(velocity.clone());
+        debris_velocity.value *= rng.random_range(0.5..1.0);
+
+        let mut debris_xform = Transform::from_translation(xform.translation);
+        debris_xform.scale *= rng.random_range(0.1..0.4);
+
+        commands.spawn((
+            debris_velocity,
+            Acceleration::from(acceleration.clone()),
+            SceneBundle {
+                scene: SceneRoot(scene_assets.asteroid.clone()),
+                transform: debris_xform,
+            },
+            AsteroidDebris,
+        ));
     }
 }

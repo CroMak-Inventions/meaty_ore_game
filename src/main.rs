@@ -31,7 +31,7 @@ use debug::DebugPlugin;
 fn main() {
     App::new()
         // System defined plugings
-        .insert_resource(ClearColor(Color::linear_rgb(0.01,0.0,0.015)))
+        .insert_resource(ClearColor(Color::linear_rgb(0.0005,0.0,0.005)))
         .insert_resource(AmbientLight {
             color: Color::default(),
             brightness: 750.0,

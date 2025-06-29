@@ -156,19 +156,18 @@ fn spaceship_weapon_controls(
         return;
     };
 
-    let mut missile_xform = Transform::from_translation(
-        transform.translation + -transform.forward() * MISSILE_FORWARD_SPAWN_SCALAR,
-    );
-    missile_xform.rotate(transform.rotation);
-
     if keyboard_input.pressed(KeyCode::Space) &&
        rate_timer.timer.finished()
     {
         let missile_number = missile_query.iter().len();
-        println!("number of missiles spawned: {:?}", missile_number);
 
         if missile_number < MISSILE_MAX {
             rate_timer.timer.reset();
+
+            let mut missile_xform = Transform::from_translation(
+                transform.translation + -transform.forward() * MISSILE_FORWARD_SPAWN_SCALAR,
+            );
+            missile_xform.rotate(transform.rotation);
 
             commands.spawn((
                 MovingObjectBundle {

@@ -13,7 +13,7 @@ pub struct GameSoundEffects;
 pub struct ShootingSoundEvent;
 
 #[derive(Event, Debug)]
-pub struct MeteorCollisionSoundEvent;
+pub struct AsteroidCollisionSoundEvent;
 
 
 pub struct SoundFXPlugin;
@@ -29,7 +29,7 @@ impl Plugin for SoundFXPlugin {
             ).in_set(InGameSet::EntityUpdates),
         )
         .add_event::<ShootingSoundEvent>()
-        .add_event::<MeteorCollisionSoundEvent>();
+        .add_event::<AsteroidCollisionSoundEvent>();
     }
 }
 
@@ -58,7 +58,7 @@ fn play_shooting_sound(
 }
 
 fn play_meteor_collision_sound(
-    mut sound_event_reader: EventReader<MeteorCollisionSoundEvent>,
+    mut sound_event_reader: EventReader<AsteroidCollisionSoundEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {

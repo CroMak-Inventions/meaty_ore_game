@@ -1,11 +1,12 @@
 use bevy::{platform::collections::HashMap, prelude::*};
 
 use crate::{
-    asteroids::Asteroid,
+    asteroids::{Asteroid, AsteroidCollisionAnimationEvent},
     health::Health,
+    movement::{Acceleration, Velocity},
     schedule::InGameSet,
-    sound_fx::MeteorCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile},
+    sound_fx::AsteroidCollisionSoundEvent,
+    spaceship::{Spaceship, SpaceshipMissile}
 };
 
 
@@ -58,11 +59,11 @@ impl Plugin for CollisionDetectionPlugin {
             Update,
             (
                 (
-                    handle_collisions::<Asteroid>,
-                    handle_collisions::<Spaceship>,
-                    handle_collisions::<SpaceshipMissile>,
+                    dispatch_collistion_events::<Asteroid>,
+                    dispatch_collistion_events::<Spaceship>,
+                    dispatch_collistion_events::<SpaceshipMissile>,
                 ),
-                apply_collision_damage,
+                handle_collision_event,
             )
             .chain()
             .in_set(InGameSet::EntityUpdates),
@@ -72,7 +73,7 @@ impl Plugin for CollisionDetectionPlugin {
 }
 
 fn collision_detection(
-    mut query: Query<(Entity, &GlobalTransform, &mut Collider)>
+    mut query: Query<(Entity, &Transform, &mut Collider)>
 ) {
     let mut colliding_entities: HashMap<Entity, Vec<Entity>> = HashMap::new();
 
@@ -85,9 +86,8 @@ fn collision_detection(
 
         for (entity_b, transform_b, collider_b) in query.iter() {
             if entity_a != entity_b {
-                let distance = transform_a
-                                    .translation()
-                                    .distance(transform_b.translation());
+                let distance = transform_a.translation
+                                    .distance(transform_b.translation);
                 if distance < collider_a.radius + collider_b.radius {
                     colliding_entities
                         .entry(entity_a)
@@ -112,9 +112,8 @@ fn collision_detection(
 }
 
 
-fn handle_collisions<T: Component>(
+fn dispatch_collistion_events<T: Component>(
     mut collision_event_writer: EventWriter<CollisionEvent>,
-    mut sound_event_writer: EventWriter<MeteorCollisionSoundEvent>,
     query: Query<(Entity, &Collider), With<T>>
 ) {
     for (entity, collider) in query.iter() {
@@ -128,29 +127,57 @@ fn handle_collisions<T: Component>(
                 entity,
                 collided_entity,
             ));
-
-            sound_event_writer.write(MeteorCollisionSoundEvent);
         }
     }
 }
 
-pub fn apply_collision_damage(
+pub fn handle_collision_event(
     mut collision_event_reader: EventReader<CollisionEvent>,
-    mut health_query: Query<&mut Health>,
+    mut sound_event_writer: EventWriter<AsteroidCollisionSoundEvent>,
+    mut animation_event_writer: EventWriter<AsteroidCollisionAnimationEvent>,
+    mut query: Query<&mut Health>,
+    asteroid_query: Query<(&Velocity, &Acceleration)>,
+    missile_query: Query<(&Transform, &SpaceshipMissile)>,
     collision_damage_query: Query<&CollisionDamage>
 ) {
     for &CollisionEvent {
         entity,
         collided_entity
     } in collision_event_reader.read() {
-        let Ok(mut health) = health_query.get_mut(entity) else {
+        // let's figure out the changes in health
+        let Ok(mut health) = query.get_mut(entity) else {
             continue;
         };
 
         let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
             continue;
         };
-
+        
         health.value -= collision_damage.amount;
+        
+        // now we send out a sound
+        sound_event_writer.write(AsteroidCollisionSoundEvent);
+        
+        // now we send out a collistion animation.  We only do this for missile
+        // collisions, which is why we query for the missile.
+        let Ok((xform, _missile)) = missile_query.get(entity) else {
+            continue;
+        };
+
+        let Ok((
+            velocity,
+            acceleration,
+        )) = asteroid_query.get(collided_entity) else {
+            continue;
+        };
+
+        animation_event_writer.write(
+            AsteroidCollisionAnimationEvent::new(
+                xform,
+                velocity,
+                acceleration,
+            )
+        );
+
     }
 }

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{collision_detection::Collider, schedule::InGameSet};
 
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone)]
 pub struct Velocity {
     pub value: Vec3,
 }
@@ -14,7 +14,7 @@ impl Velocity {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone)]
 pub struct Acceleration {
     pub value: Vec3,
 }
