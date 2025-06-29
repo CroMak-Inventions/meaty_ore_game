@@ -108,7 +108,7 @@ fn wrap_position<T: Component>(
         }
 
         if transform.translation.z < min_z {
-            transform.translation.z = max_z - min_z - transform.translation.z;
+            transform.translation.z = max_z - (min_z - transform.translation.z);
             continue;
         }
 
