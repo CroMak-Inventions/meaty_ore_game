@@ -13,14 +13,12 @@ out in the videos there are a couple of extra features that have been added.
     - The missile is despawned
     - Asteroid debris is spawned in with a random size & velocity.
     - Sound effect for a missile hitting an Asteroid.
+- Asteroids and the spaceship wrap to the opposite side of the screen
+  instead of going off into the distance forever.
 - Sound effect for shooting.
 - Ambient music in the background.
 
 ## Proposed Features
 
-- It would be nice if the asteroids would wrap to the other side of the screen
-  instead of going off into the distance forever.
-- It would be nice if the spaceship would also wrap to the other side of the
-  screen.
 - It would be nice if the spaceship would have zero G movement behavior, like
   it's in space.
