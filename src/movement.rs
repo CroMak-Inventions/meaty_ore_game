@@ -1,6 +1,14 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    render::camera::CameraProjection
+};
 
-use crate::{collision_detection::Collider, schedule::InGameSet};
+use crate::{
+    asteroids::Asteroid,
+    collision_detection::Collider,
+    schedule::InGameSet,
+    spaceship::Spaceship
+};
 
 
 #[derive(Component, Debug, Clone)]
@@ -48,6 +56,8 @@ impl Plugin for MovementPlugin {
         app.add_systems(Update, (
                 update_velocity,
                 update_position,
+                wrap_position::<Asteroid>,
+                wrap_position::<Spaceship>,
             )
             .chain()
             .in_set(InGameSet::EntityUpdates),
@@ -64,5 +74,47 @@ fn update_velocity(mut query: Query<(&Acceleration, &mut Velocity)>, time: Res<T
 fn update_position(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
     for (velocity, mut position) in query.iter_mut() {
         position.translation += velocity.value * time.delta_secs();
+    }
+}
+
+fn wrap_position<T: Component>(
+    camera_query: Query<&Projection, With<Camera>>,
+    mut query: Query<&mut Transform, With<T>>,
+) {
+    // When a missile goes off-screen, we despawn it.
+    let mut min_x: f32 = 0.0;
+    let mut max_x: f32 = 0.0;
+    let mut min_z: f32 = 0.0;
+    let mut max_z: f32 = 0.0;
+
+    let projection = camera_query.single().unwrap();
+    let bounds = projection.get_frustum_corners(0.0, 80.0);
+    for b in bounds {
+        if min_x > b.x {min_x = b.x}
+        if max_x < b.x {max_x = b.x}
+        if min_z > b.y {min_z = b.y}
+        if max_z < b.y {max_z = b.y}
+    }
+    
+    for mut transform in query.iter_mut() {
+        if transform.translation.x < min_x {
+            transform.translation.x = max_x - (min_x - transform.translation.x);
+            continue;
+        }
+
+        if transform.translation.x > max_x {
+            transform.translation.x = min_x + transform.translation.x - max_x;
+            continue;
+        }
+
+        if transform.translation.z < min_z {
+            transform.translation.z = max_z - min_z - transform.translation.z;
+            continue;
+        }
+
+        if transform.translation.z > max_z {
+            transform.translation.z = min_z + transform.translation.z - max_z;
+            continue;
+        }
     }
 }

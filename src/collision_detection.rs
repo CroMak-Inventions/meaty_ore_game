@@ -79,11 +79,6 @@ fn collision_detection(
 
     // First, detect collisions.
     for (entity_a, transform_a, collider_a) in query.iter() {
-        // todo: we can design this a bit more efficiently by employing a
-        //       "shellsort" inspired loop.  the .remaining() function will
-        //       let us do that.
-        //let query_iter = query.iter().remaining()
-
         for (entity_b, transform_b, collider_b) in query.iter() {
             if entity_a != entity_b {
                 let distance = transform_a.translation
@@ -96,7 +91,6 @@ fn collision_detection(
                 }
             }
         }
-
     }
 
     // Second, Update Colliders
