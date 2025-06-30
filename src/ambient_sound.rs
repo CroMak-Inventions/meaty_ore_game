@@ -5,6 +5,9 @@ use crate::asset_loader::SceneAssets;
 #[derive(Component, Debug)]
 pub struct GameAmbientSound;
 
+#[derive(Component, Debug)]
+pub struct ThrusterSound;
+
 pub struct AmbientSoundPlugin;
 
 impl Plugin for AmbientSoundPlugin {
@@ -23,5 +26,11 @@ fn spawn_ambient_sound(
         AudioPlayer::new(scene_assets.background_music.clone()),
         PlaybackSettings::LOOP,
         GameAmbientSound,
+    ));
+
+    commands.spawn((
+        AudioPlayer::new(scene_assets.thruster_sound.clone()),
+        PlaybackSettings::LOOP,
+        ThrusterSound,
     ));
 }

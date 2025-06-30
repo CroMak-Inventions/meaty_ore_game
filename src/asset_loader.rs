@@ -7,6 +7,7 @@ pub struct SceneAssets {
     pub missiles: Handle<Scene>,
     pub shooting_sound: Handle<AudioSource>,
     pub meteor_hit_sound: Handle<AudioSource>,
+    pub thruster_sound: Handle<AudioSource>,
     pub background_music: Handle<AudioSource>,
     pub font: Handle<Font>,
 }
@@ -30,6 +31,7 @@ fn load_assets(
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
         shooting_sound: asset_server.load("sound/shoot2.ogg"),
         meteor_hit_sound: asset_server.load("sound/meteorhit3.ogg"),
+        thruster_sound: asset_server.load("sound/Rocket.ogg"),
         background_music: asset_server.load("sound/CryforMercyButtheClockTicksDown.ogg"),
         font: asset_server.load("fonts/fira-sans.bold.ttf"),
     }

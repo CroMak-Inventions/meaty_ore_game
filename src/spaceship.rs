@@ -1,14 +1,23 @@
-use bevy::prelude::*;
-use bevy::render::camera::CameraProjection;
+use bevy::{
+    prelude::*,
+    render::camera::CameraProjection,
+    audio::Volume,
+};
 
 use crate::{
+    ambient_sound::ThrusterSound,
     asset_loader::SceneAssets,
     collision_detection::{Collider, CollisionDamage},
     health::Health,
-    movement::{Acceleration, MovingObjectBundle, SceneBundle, Velocity},
+    movement::{
+        Acceleration,
+        MovingObjectBundle,
+        SceneBundle,
+        Velocity
+    },
     schedule::InGameSet,
-    state::GameState,
     sound_fx::ShootingSoundEvent,
+    state::GameState,
 };
 
 
@@ -62,6 +71,7 @@ impl Plugin for SpaceshipPlugin {
                 spaceship_movement_controls,
                 spaceship_weapon_controls,
                 spaceship_shield_controls,
+                spaceship_thruster_sound_control,
             )
             .chain()
             .in_set(InGameSet::UserInput)
@@ -245,5 +255,26 @@ fn spaceship_destroyed(
 ) {
     if query.single().is_err() {
         next_state.set(GameState::GameOver);
+    }
+}
+
+fn spaceship_thruster_sound_control(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut thruster_audio: Query<&mut AudioSink, With<ThrusterSound>>,
+) {
+    let Ok(mut sink) = thruster_audio.single_mut() else {
+        return;
+    };
+
+    println!("spaceship_thruster_sound(): volume: {:?}", sink.volume());
+    if keyboard_input.any_pressed([
+        KeyCode::ArrowUp,
+        KeyCode::ArrowDown,
+        KeyCode::KeyW,
+        KeyCode::KeyS,
+    ]) {
+        sink.set_volume(Volume::Linear(1.5));
+    } else {
+        sink.set_volume(Volume::Linear(0.0));
     }
 }
