@@ -12,6 +12,7 @@ mod state;
 mod health;
 mod sound_fx;
 mod ambient_sound;
+mod score_text;
 mod debug;
 
 
@@ -26,6 +27,7 @@ use schedule::SchedulePlugin;
 use state::StatePlugin;
 use sound_fx::SoundFXPlugin;
 use ambient_sound::AmbientSoundPlugin;
+use score_text::ScorePlugin;
 use debug::DebugPlugin;
 
 fn main() {
@@ -51,6 +53,7 @@ fn main() {
             StatePlugin,
             SoundFXPlugin,
             AmbientSoundPlugin,
+            ScorePlugin,
             DebugPlugin,
         ))
         .run();

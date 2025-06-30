@@ -23,17 +23,17 @@ impl Plugin for DespawnPlugin {
         )
         .add_systems(
             OnEnter(GameState::GameOver),
-            despawn_all_entities
+            despawn_all_entities::<Health>,
         );
     }
 }
 
 fn despawn_far_away_entities(
     mut commands: Commands,
-    query: Query<(Entity, &GlobalTransform)>
+    query: Query<(Entity, &Transform)>
 ) {
     for (entity, transform) in query.iter() {
-        let distance = transform.translation().distance(Vec3::ZERO);
+        let distance = transform.translation.distance(Vec3::ZERO);
 
         if distance > DESPAWN_DISTANCE {
             commands.entity(entity).despawn();
@@ -52,9 +52,9 @@ fn despawn_dead_entities(
     }
 }
 
-fn despawn_all_entities(
+fn despawn_all_entities<T: Component>(
     mut commands: Commands,
-    query: Query<Entity, With<Health>>,
+    query: Query<Entity, With<T>>,
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();

@@ -8,6 +8,7 @@ pub struct SceneAssets {
     pub shooting_sound: Handle<AudioSource>,
     pub meteor_hit_sound: Handle<AudioSource>,
     pub background_music: Handle<AudioSource>,
+    pub font: Handle<Font>,
 }
 
 pub struct AssetLoaderPlugin;
@@ -30,5 +31,6 @@ fn load_assets(
         shooting_sound: asset_server.load("sound/shoot2.ogg"),
         meteor_hit_sound: asset_server.load("sound/meteorhit3.ogg"),
         background_music: asset_server.load("sound/CryforMercyButtheClockTicksDown.ogg"),
+        font: asset_server.load("fonts/fira-sans.bold.ttf"),
     }
 }

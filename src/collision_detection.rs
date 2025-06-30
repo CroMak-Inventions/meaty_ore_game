@@ -129,7 +129,7 @@ pub fn handle_collision_event(
     mut collision_event_reader: EventReader<CollisionEvent>,
     mut sound_event_writer: EventWriter<AsteroidCollisionSoundEvent>,
     mut animation_event_writer: EventWriter<AsteroidCollisionAnimationEvent>,
-    mut query: Query<&mut Health>,
+    mut health_query: Query<&mut Health>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<(&Transform, &SpaceshipMissile)>,
     collision_damage_query: Query<&CollisionDamage>
@@ -139,19 +139,19 @@ pub fn handle_collision_event(
         collided_entity
     } in collision_event_reader.read() {
         // let's figure out the changes in health
-        let Ok(mut health) = query.get_mut(entity) else {
+        let Ok(mut health) = health_query.get_mut(entity) else {
             continue;
         };
 
         let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
             continue;
         };
-        
+
         health.value -= collision_damage.amount;
-        
+
         // now we send out a sound
         sound_event_writer.write(AsteroidCollisionSoundEvent);
-        
+
         // now we send out a collistion animation.  We only do this for missile
         // collisions, which is why we query for the missile.
         let Ok((xform, _missile)) = missile_query.get(entity) else {
@@ -172,6 +172,5 @@ pub fn handle_collision_event(
                 acceleration,
             )
         );
-
     }
 }

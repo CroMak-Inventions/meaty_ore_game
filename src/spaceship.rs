@@ -6,7 +6,8 @@ use crate::{
     collision_detection::{Collider, CollisionDamage},
     health::Health,
     movement::{Acceleration, MovingObjectBundle, SceneBundle, Velocity},
-    schedule::InGameSet, state::GameState,
+    schedule::InGameSet,
+    state::GameState,
     sound_fx::ShootingSoundEvent,
 };
 
@@ -91,11 +92,11 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
 }
 
 fn spaceship_movement_controls(
-    mut query: Query<(&mut Transform, &mut Velocity), With<Spaceship>>,
+    mut query: Query<(&mut Transform, &mut Acceleration), With<Spaceship>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    let Ok((mut transform, mut velocity)) = query.single_mut() else {
+    let Ok((mut transform, mut acceleration)) = query.single_mut() else {
         return;
     };
 
@@ -136,7 +137,7 @@ fn spaceship_movement_controls(
     transform.rotate_local_z(roll);
 
     // update the spaceship's velocity based on new direction
-    velocity.value = -transform.forward() * movement;
+    acceleration.value = -transform.forward() * movement;
 }
 
 
@@ -231,8 +232,7 @@ fn despawn_missles(
            transform.translation.z < min_z ||
            transform.translation.z > max_z
         {
-            println!("bounds: [{:?}, {:?}], [{:?}, {:?}]", min_x, max_x, min_z, max_z);
-            println!("Despawn entity: {:?}", entity);
+            //println!("despawn_missiles(): Despawn entity: {:?}", entity);
             commands.entity(entity).despawn();
         }
     }
