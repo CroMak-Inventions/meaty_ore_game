@@ -266,7 +266,6 @@ fn spaceship_thruster_sound_control(
         return;
     };
 
-    println!("spaceship_thruster_sound(): volume: {:?}", sink.volume());
     if keyboard_input.any_pressed([
         KeyCode::ArrowUp,
         KeyCode::ArrowDown,
