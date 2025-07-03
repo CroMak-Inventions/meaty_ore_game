@@ -29,10 +29,10 @@ fn load_assets(
         asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
         spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Spaceship.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
-        shooting_sound: asset_server.load("sound/shoot2.ogg"),
-        meteor_hit_sound: asset_server.load("sound/meteorhit3.ogg"),
+        shooting_sound: asset_server.load("sound/Shoot-2.ogg"),
+        meteor_hit_sound: asset_server.load("sound/MeteorHit-3.ogg"),
         thruster_sound: asset_server.load("sound/Rocket.ogg"),
-        background_music: asset_server.load("sound/CryforMercyButtheClockTicksDown.ogg"),
+        background_music: asset_server.load("sound/CryForMercyButTheClockTicksDown.ogg"),
         font: asset_server.load("fonts/fira-sans.bold.ttf"),
     }
 }

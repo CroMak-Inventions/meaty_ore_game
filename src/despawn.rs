@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 
 use crate::{
+    asteroids::Asteroid,
     health::Health,
     schedule::InGameSet,
-    state::GameState,
     sound_fx::GameSoundEffects,
+    spaceship::Spaceship,
+    state::GameState
 };
 
 const DESPAWN_DISTANCE: f32 = 100.0;
@@ -16,7 +18,8 @@ impl Plugin for DespawnPlugin {
         app.add_systems(
             Update,
             (
-                despawn_far_away_entities,
+                despawn_far_away_entities::<Asteroid>,
+                despawn_far_away_entities::<Spaceship>,
                 despawn_dead_entities,
                 despawn_old_audiosink_entities,
             ).in_set(InGameSet::DespawnEntities),
@@ -28,9 +31,9 @@ impl Plugin for DespawnPlugin {
     }
 }
 
-fn despawn_far_away_entities(
+fn despawn_far_away_entities<T: Component>(
     mut commands: Commands,
-    query: Query<(Entity, &Transform)>
+    query: Query<(Entity, &Transform), With<T>>
 ) {
     for (entity, transform) in query.iter() {
         let distance = transform.translation.distance(Vec3::ZERO);
