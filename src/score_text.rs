@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    asset_loader::SceneAssets, asteroids::Asteroid, health::Health, state::GameState
+    asset_loader::SceneAssets,
+    asteroids::Asteroid,
+    health::Health,
+    state::GameState
 };
 
 #[derive(Component, Debug)]

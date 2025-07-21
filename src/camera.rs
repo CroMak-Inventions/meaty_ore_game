@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-
 const CAMERA_DISTANCE: f32 = 80.0;
 
 

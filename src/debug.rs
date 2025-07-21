@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
-use crate::schedule::InGameSet;
-use crate::movement::Velocity;
+use crate::{
+    movement::Velocity,
+    schedule::InGameSet,
+};
 
 pub struct DebugPlugin;
 

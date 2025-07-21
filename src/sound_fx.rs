@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{asset_loader::SceneAssets, schedule::InGameSet};
+use crate::{
+    asset_loader::SceneAssets,
+    schedule::InGameSet,
+};
 
 
 #[derive(Component, Debug)]
