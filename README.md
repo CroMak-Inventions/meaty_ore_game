@@ -19,3 +19,5 @@ out in the videos there are a couple of extra features that have been added.
 - Sound effect for shooting.
 - Ambient music in the background.
 - Score is displayed in the top-left.
+- Last score is displayed in the top-right.
+- High score is displayed in the top-center.
