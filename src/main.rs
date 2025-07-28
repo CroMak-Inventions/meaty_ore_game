@@ -10,6 +10,7 @@ mod despawn;
 mod schedule;
 mod state;
 mod health;
+mod lighting;
 mod sound_fx;
 mod ambient_sound;
 mod score_text;
@@ -25,6 +26,7 @@ use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
 use schedule::SchedulePlugin;
 use state::StatePlugin;
+use lighting::LightingPlugin;
 use sound_fx::SoundFXPlugin;
 use ambient_sound::AmbientSoundPlugin;
 use score_text::ScorePlugin;
@@ -36,7 +38,7 @@ fn main() {
         .insert_resource(ClearColor(Color::linear_rgb(0.0005,0.0,0.005)))
         .insert_resource(AmbientLight {
             color: Color::default(),
-            brightness: 750.0,
+            brightness: 250.0,
             affects_lightmapped_meshes: true
         })
         .add_plugins(DefaultPlugins)
@@ -51,10 +53,11 @@ fn main() {
             DespawnPlugin,
             SchedulePlugin,
             StatePlugin,
+            LightingPlugin,
             SoundFXPlugin,
             AmbientSoundPlugin,
             ScorePlugin,
-            DebugPlugin,
+            //DebugPlugin,
         ))
         .run();
     
