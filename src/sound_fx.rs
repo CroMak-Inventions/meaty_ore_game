@@ -1,13 +1,18 @@
-use bevy::prelude::*;
+use bevy::{audio, prelude::*};
 
 use crate::{
     asset_loader::SceneAssets,
     schedule::InGameSet,
 };
 
+const SOUND_EFFECTS_VOLUME: audio::Volume = audio::Volume::Linear(0.8);
+
 
 #[derive(Component, Debug)]
-pub struct GameSoundEffects;
+pub struct GameSoundEffects {
+    volume_is_set: bool,
+    volume: audio::Volume,
+}
 
 
 // in the future, we will have multiple sounds.  It might make sense
@@ -29,6 +34,7 @@ impl Plugin for SoundFXPlugin {
             (
                 play_shooting_sound,
                 play_meteor_collision_sound,
+                set_sound_fx_volume,
             ).in_set(InGameSet::EntityUpdates),
         )
         .add_event::<ShootingSoundEvent>()
@@ -55,7 +61,10 @@ fn play_shooting_sound(
     for _ in sound_event_reader.read() {
         commands.spawn((
             AudioPlayer::new(scene_assets.shooting_sound.clone()),
-            GameSoundEffects,
+            GameSoundEffects {
+                volume_is_set: false,
+                volume: SOUND_EFFECTS_VOLUME,
+            },
         ));
     }
 }
@@ -68,7 +77,25 @@ fn play_meteor_collision_sound(
     for _ in sound_event_reader.read() {
         commands.spawn((
             AudioPlayer::new(scene_assets.meteor_hit_sound.clone()),
-            GameSoundEffects,
+            GameSoundEffects {
+                volume_is_set: false,
+                volume: SOUND_EFFECTS_VOLUME,
+            },
         ));
+    }
+}
+
+fn set_sound_fx_volume(
+    mut query: Query<(&mut AudioSink, &mut GameSoundEffects)>,
+) {
+    // It would be very convenient if we could set the volume at the time of
+    // spawning our sound effects, but it doesn't seem possible, at least for
+    // our current version of Bevy.  So we immediately set the volume the
+    // first time it appears in the query.
+    for (mut audio_sink, mut game_sound_fx) in query.iter_mut() {
+        if !game_sound_fx.volume_is_set {
+            audio_sink.set_volume(game_sound_fx.volume);
+            game_sound_fx.volume_is_set = true;
+        }
     }
 }

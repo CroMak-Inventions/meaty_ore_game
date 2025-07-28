@@ -64,6 +64,7 @@ impl Plugin for AsteroidPlugin {
         .add_systems(Update, (
                 spawn_asteroid,
                 rotate_asteroids,
+                rotate_asteroid_debris,
                 spawn_collision_animation,
             ).in_set(InGameSet::EntityUpdates),
         )
@@ -122,6 +123,15 @@ fn rotate_asteroids(
 ) {
     for mut transform in query.iter_mut() {
         transform.rotate_local_z(ROTATE_SPEED * time.delta_secs());
+    }
+}
+
+fn rotate_asteroid_debris(
+    mut query: Query<&mut Transform, With<AsteroidDebris>>,
+    time: Res<Time>,
+) {
+    for mut transform in query.iter_mut() {
+        transform.rotate_local_z((ROTATE_SPEED / 5.0) * time.delta_secs());
     }
 }
 
