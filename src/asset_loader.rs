@@ -27,7 +27,7 @@ fn load_assets(
 ) {
     *scene_assets = SceneAssets {
         asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
-        spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Spaceship.glb")),
+        spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("SpaceshipNew.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
         shooting_sound: asset_server.load("sound/Shoot-2.ogg"),
         meteor_hit_sound: asset_server.load("sound/MeteorHit-3.ogg"),
