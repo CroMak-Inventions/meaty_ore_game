@@ -97,10 +97,9 @@ fn spawn_asteroid(
         rng.random_range(SPAWN_RANGE_Z),
     );
 
-    let rotation = Rotation::new(
-        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
-        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
-        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
+    let rotation = Rotation::random(
+        -MAX_ROTATE_SPEED,
+        MAX_ROTATE_SPEED
     );
 
     let mut random_unit_vector = 
@@ -159,11 +158,11 @@ fn spawn_collision_animation(
         let mut debris_xform = Transform::from_translation(xform.translation);
         debris_xform.scale *= rng.random_range(0.1..0.4);
 
-        let rotation = Rotation::new(
-            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
-            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
-            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
+        let rotation = Rotation::random(
+            -MAX_ROTATE_SPEED / 2.0,
+            MAX_ROTATE_SPEED / 2.0,
         );
+
 
         commands.spawn((
             MovingObjectBundle {

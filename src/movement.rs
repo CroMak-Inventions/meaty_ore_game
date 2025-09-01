@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use bevy::{
     prelude::*,
     render::camera::CameraProjection
@@ -43,6 +45,16 @@ pub struct Rotation {
 impl Rotation {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self {x, y, z}
+    }
+
+    pub fn random(min_range: f32, max_range: f32) -> Self {
+        let mut rng = rand::rng();
+
+        Self {
+            x: rng.random_range(min_range..max_range),
+            y: rng.random_range(min_range..max_range),
+            z: rng.random_range(min_range..max_range),
+        }
     }
 }
 
