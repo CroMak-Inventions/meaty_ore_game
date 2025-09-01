@@ -12,8 +12,9 @@ use crate::{
     movement::{
         Acceleration,
         MovingObjectBundle,
+        Rotation,
         SceneBundle,
-        Velocity
+        Velocity,
     },
     schedule::InGameSet,
     sound_fx::ShootingSoundEvent,
@@ -89,6 +90,7 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
         MovingObjectBundle {
             velocity: Velocity::new(STARTING_VELOCITY),
             acceleration: Acceleration::new(Vec3::ZERO),
+            rotation: Rotation::new(0.0, 0.0, 0.0),
             collider: Collider::new(SPACESHIP_RADIUS),
             model: SceneBundle {
                 scene: SceneRoot(scene_assets.spaceship.clone()),
@@ -184,6 +186,7 @@ fn spaceship_weapon_controls(
                 MovingObjectBundle {
                     velocity: Velocity::new(-transform.forward() * MISSILE_SPEED),
                     acceleration: Acceleration::new(Vec3::ZERO),
+                    rotation: Rotation::new(0.0, 0.0, 0.0),
                     collider: Collider::new(MISSILE_RADIUS),
                     model: SceneBundle {
                         scene: SceneRoot(scene_assets.missiles.clone()),

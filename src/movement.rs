@@ -33,6 +33,19 @@ impl Acceleration {
     }
 }
 
+#[derive(Component, Debug, Clone)]
+pub struct Rotation {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl Rotation {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Self {x, y, z}
+    }
+}
+
 
 #[derive(Bundle)]
 pub struct SceneBundle {
@@ -44,6 +57,7 @@ pub struct SceneBundle {
 pub struct MovingObjectBundle {
     pub velocity: Velocity,
     pub acceleration: Acceleration,
+    pub rotation: Rotation,
     pub collider: Collider,
     pub model: SceneBundle,
 }
@@ -81,6 +95,9 @@ fn wrap_position<T: Component>(
     camera_query: Query<&Projection, With<Camera>>,
     mut query: Query<&mut Transform, With<T>>,
 ) {
+    // Wrap the positions of the objects so that they don't just go off
+    // into infinity, but wrap to the other side of the screen.
+
     // When a missile goes off-screen, we despawn it.
     let mut min_x: f32 = 0.0;
     let mut max_x: f32 = 0.0;

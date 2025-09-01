@@ -7,7 +7,13 @@ use crate::{
     asset_loader::SceneAssets,
     collision_detection::{Collider, CollisionDamage},
     health::Health,
-    movement::{Acceleration, Velocity, MovingObjectBundle, SceneBundle},
+    movement::{
+        Acceleration,
+        Velocity,
+        Rotation,
+        MovingObjectBundle,
+        SceneBundle
+    },
     schedule::InGameSet,
 };
 
@@ -17,7 +23,7 @@ const ACCELERATION_SCALAR: f32 = 1.0;
 const SPAWN_RANGE_X: Range<f32> =  -25.0..25.0;
 const SPAWN_RANGE_Z: Range<f32> = 0.0..25.0;
 const SPAWN_TIME_SECONDS: f32 = 4.0;
-const ROTATE_SPEED: f32 = 2.5;
+const MAX_ROTATE_SPEED: f32 = 3.0;
 const RADIUS: f32 = 1.5;
 const HEALTH: f32 = 20.0;
 const COLLISION_DAMAGE: f32 = 35.0;
@@ -63,8 +69,8 @@ impl Plugin for AsteroidPlugin {
         })
         .add_systems(Update, (
                 spawn_asteroid,
-                rotate_asteroids,
-                rotate_asteroid_debris,
+                rotate_passive_objects::<Asteroid>,
+                rotate_passive_objects::<AsteroidDebris>,
                 spawn_collision_animation,
             ).in_set(InGameSet::EntityUpdates),
         )
@@ -91,6 +97,12 @@ fn spawn_asteroid(
         rng.random_range(SPAWN_RANGE_Z),
     );
 
+    let rotation = Rotation::new(
+        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
+        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
+        rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED),
+    );
+
     let mut random_unit_vector = 
         || Vec3::new(
             rng.random_range(-1.0..1.0),
@@ -105,6 +117,7 @@ fn spawn_asteroid(
         MovingObjectBundle {
             velocity: Velocity { value: velocity },
             acceleration: Acceleration { value: acceleration },
+            rotation: rotation,
             collider: Collider::new(RADIUS),
             model: SceneBundle {
                 scene: SceneRoot(scene_assets.asteroid.clone()),
@@ -117,21 +130,14 @@ fn spawn_asteroid(
     ));
 }
 
-fn rotate_asteroids(
-    mut query: Query<&mut Transform, With<Asteroid>>,
-    time: Res<Time>,
-) {
-    for mut transform in query.iter_mut() {
-        transform.rotate_local_z(ROTATE_SPEED * time.delta_secs());
-    }
-}
 
-fn rotate_asteroid_debris(
-    mut query: Query<&mut Transform, With<AsteroidDebris>>,
+fn rotate_passive_objects<T: Component>(
+    mut query: Query<(&mut Transform, &Rotation), With<T>>,
     time: Res<Time>,
 ) {
-    for mut transform in query.iter_mut() {
-        transform.rotate_local_z((ROTATE_SPEED / 5.0) * time.delta_secs());
+    for (mut transform, rotation) in query.iter_mut() {
+        transform.rotate_local_x(rotation.x * time.delta_secs());
+        transform.rotate_local_z(rotation.z * time.delta_secs());
     }
 }
 
@@ -153,12 +159,22 @@ fn spawn_collision_animation(
         let mut debris_xform = Transform::from_translation(xform.translation);
         debris_xform.scale *= rng.random_range(0.1..0.4);
 
+        let rotation = Rotation::new(
+            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
+            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
+            rng.random_range(-MAX_ROTATE_SPEED..MAX_ROTATE_SPEED) / 2.0,
+        );
+
         commands.spawn((
-            debris_velocity,
-            Acceleration::from(acceleration.clone()),
-            SceneBundle {
-                scene: SceneRoot(scene_assets.asteroid.clone()),
-                transform: debris_xform,
+            MovingObjectBundle {
+                velocity: debris_velocity,
+                acceleration: Acceleration::from(acceleration.clone()),
+                rotation: rotation,
+                collider: Collider::new(RADIUS),
+                model: SceneBundle {
+                    scene: SceneRoot(scene_assets.asteroid.clone()),
+                    transform: debris_xform,
+                },
             },
             AsteroidDebris,
         ));
