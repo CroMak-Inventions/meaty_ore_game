@@ -15,6 +15,7 @@ use crate::{
         SceneBundle
     },
     schedule::InGameSet,
+    spaceship::{Spaceship, SPACESHIP_RADIUS},
 };
 
 
@@ -80,6 +81,7 @@ impl Plugin for AsteroidPlugin {
 
 fn spawn_asteroid(
     mut commands: Commands,
+    spaceship_xform: Single<&Transform, With<Spaceship>>,
     mut spawn_timer: ResMut<AsteroidSpawnTimer>,
     time: Res<Time>,
     scene_assets: Res<SceneAssets>,
@@ -91,11 +93,32 @@ fn spawn_asteroid(
 
     let mut rng = rand::rng();
 
-    let translation = Vec3::new(
+    let mut translation = Vec3::new(
         rng.random_range(SPAWN_RANGE_X),
         0.0,
         rng.random_range(SPAWN_RANGE_Z),
     );
+
+    for _i in 0..2 {
+        // It is a bit unfair to have an asteroid spawn right on top of the
+        // spaceship.  So we allow a (finite) number of chances to choose
+        // a different location if this happens.
+        // There is still a tiny chance of this happening, but it will be
+        // considerably less annoying.  Without this, it was happening
+        // at least once per game.
+        let distance = translation.distance(spaceship_xform.translation);
+
+        if distance >= SPACESHIP_RADIUS * 2.0 {
+            break;
+        }
+        else {
+            translation = Vec3::new(
+                rng.random_range(SPAWN_RANGE_X),
+                0.0,
+                rng.random_range(SPAWN_RANGE_Z),
+            );
+        }
+    }
 
     let rotation = Rotation::random(
         -MAX_ROTATE_SPEED,

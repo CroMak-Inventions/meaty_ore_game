@@ -24,7 +24,7 @@ use crate::{
 
 const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
-const SPACESHIP_RADIUS: f32 = 2.5;
+pub const SPACESHIP_RADIUS: f32 = 2.5;
 const SPACESHIP_SPEED: f32 = 25.0;
 const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
 const SPACESHIP_ROLL_SPEED: f32 = 2.5;
