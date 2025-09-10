@@ -1,35 +1,37 @@
 use bevy::prelude::*;
 
+mod ambient_sound;
 mod asset_loader;
-mod movement;
-mod spaceship;
 mod asteroids;
 mod camera;
 mod collision_detection;
 mod despawn;
-mod schedule;
-mod state;
+mod game_over;
 mod health;
 mod lighting;
-mod sound_fx;
-mod ambient_sound;
+mod movement;
+mod schedule;
 mod score_text;
+mod sound_fx;
+mod spaceship;
+mod state;
 mod debug;
 
 
+use ambient_sound::AmbientSoundPlugin;
 use asset_loader::AssetLoaderPlugin;
-use movement::MovementPlugin;
-use spaceship::SpaceshipPlugin;
 use asteroids::AsteroidPlugin;
 use camera::CameraPlugin;
 use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
-use schedule::SchedulePlugin;
-use state::StatePlugin;
+use game_over::GameOverPlugin;
 use lighting::LightingPlugin;
-use sound_fx::SoundFXPlugin;
-use ambient_sound::AmbientSoundPlugin;
+use movement::MovementPlugin;
+use schedule::SchedulePlugin;
 use score_text::ScorePlugin;
+use sound_fx::SoundFXPlugin;
+use spaceship::SpaceshipPlugin;
+use state::StatePlugin;
 use debug::DebugPlugin;
 
 fn main() {
@@ -57,6 +59,7 @@ fn main() {
             SoundFXPlugin,
             AmbientSoundPlugin,
             ScorePlugin,
+            GameOverPlugin,
             //DebugPlugin,
         ))
         .run();

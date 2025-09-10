@@ -7,6 +7,7 @@ pub enum GameState {
     InGame,
     Paused,
     GameOver,
+    StartGame,
 }
 
 pub struct StatePlugin;
@@ -18,7 +19,7 @@ impl Plugin for StatePlugin {
         .add_systems(Update,
             (
                 game_state_input_events,
-                transition_to_in_game.run_if(in_state(GameState::GameOver)),
+                transition_to_in_game.run_if(in_state(GameState::StartGame)),
             )
         );
     }
