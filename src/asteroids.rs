@@ -69,7 +69,7 @@ impl Plugin for AsteroidPlugin {
             )
         })
         .add_systems(Update, (
-                spawn_asteroid,
+                spawn_asteroids,
                 rotate_passive_objects::<Asteroid>,
                 rotate_passive_objects::<AsteroidDebris>,
                 spawn_collision_animation,
@@ -79,18 +79,38 @@ impl Plugin for AsteroidPlugin {
     }
 }
 
-fn spawn_asteroid(
+fn spawn_asteroids(
     mut commands: Commands,
     spaceship_xform: Single<&Transform, With<Spaceship>>,
+    asteroids: Query<Entity, With<Asteroid>>,
     mut spawn_timer: ResMut<AsteroidSpawnTimer>,
     time: Res<Time>,
     scene_assets: Res<SceneAssets>,
 ) {
+    // We are setting up a game dynamic where a wave of asteroids, up to
+    // about 10 or so, is spawned all at once.  Enough that it is challanging,
+    // but not impossible.
+    // When the player is done shooting the last asteroid, we will spawn
+    // another wave.
     spawn_timer.timer.tick(time.delta());
     if !spawn_timer.timer.just_finished() {
         return;
     }
 
+    if asteroids.iter().len() == 0 {
+        // All asteroids have been cleared.  Time to spawn.
+        for _i in 0..10 {
+            // spawn an asteroid
+            spawn_asteroid(&mut commands, &spaceship_xform, &scene_assets.asteroid);
+        }
+    }
+}
+
+fn spawn_asteroid(
+    commands: &mut Commands,
+    spaceship_xform: &Transform,
+    asteroid: &Handle<Scene>,
+) {
     let mut rng = rand::rng();
 
     let mut translation = Vec3::new(
@@ -131,7 +151,7 @@ fn spawn_asteroid(
             0.0,
             rng.random_range(-1.0..1.0)
         ).normalize_or_zero();
-    
+
     let velocity = random_unit_vector() * VELOCITY_SCALAR;
     let acceleration = random_unit_vector() * ACCELERATION_SCALAR;
 
@@ -142,7 +162,7 @@ fn spawn_asteroid(
             rotation: rotation,
             collider: Collider::new(RADIUS),
             model: SceneBundle {
-                scene: SceneRoot(scene_assets.asteroid.clone()),
+                scene: SceneRoot(asteroid.clone()),
                 transform: Transform::from_translation(translation),
             },
         },
@@ -151,7 +171,6 @@ fn spawn_asteroid(
         CollisionDamage::new(COLLISION_DAMAGE),
     ));
 }
-
 
 fn rotate_passive_objects<T: Component>(
     mut query: Query<(&mut Transform, &Rotation), With<T>>,
