@@ -1,0 +1,48 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_ubuntu:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+
+  build_macos_intel:
+    runs-on: macos-latest # Use a macOS runner
+
+    steps:
+      - uses: actions/checkout@v4 # Checkout your repository
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
+        with:
+          toolchain: stable
+          target: x86_64-apple-darwin # Or aarch64-apple-darwin for Apple Silicon
+
+      - name: Build release binary
+        run: cargo build --release --target x86_64-apple-darwin # Build your app for macOS
+
+      - name: Package binary
+        run: |
+          cd target/x86_64-apple-darwin/release/
+          tar -czf meaty-ore-game-macos-intel.tar.gz meaty-ore-game
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-build-intel
+          path: target/x86_64-apple-darwin/release/meaty-ore-game-macos-intel.tar.gz
