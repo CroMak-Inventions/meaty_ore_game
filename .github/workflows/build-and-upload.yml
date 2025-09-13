@@ -38,11 +38,13 @@ jobs:
 
       - name: Package binary
         run: |
-          cd target/x86_64-apple-darwin/release/
-          tar -czf meaty-ore-game-macos-intel.tar.gz meaty-ore-game
+          cd target/x86_64-apple-darwin/
+          mv ./release meaty_ore
+          cp -pr ../../assets ./meaty_ore/
+          tar -czf meaty-ore-game-macos-intel.tar.gz ./meaty_ore/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: macOS-build-intel
-          path: target/x86_64-apple-darwin/release/meaty-ore-game-macos-intel.tar.gz
+          path: target/x86_64-apple-darwin/meaty-ore-game-macos-intel.tar.gz
