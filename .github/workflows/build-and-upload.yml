@@ -74,5 +74,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-build-intel
+          name: macOS-build-arm
           path: target/aarch64-apple-darwin/meaty-ore-game-macos-arm.tar.gz
