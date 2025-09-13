@@ -1,4 +1,4 @@
-name: Rust
+name: build-and-upload
 
 on:
   push:
@@ -48,3 +48,31 @@ jobs:
         with:
           name: macOS-build-intel
           path: target/x86_64-apple-darwin/meaty-ore-game-macos-intel.tar.gz
+
+  build_macos_arm:
+    runs-on: macos-latest # Use a macOS runner
+
+    steps:
+      - uses: actions/checkout@v4 # Checkout your repository
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
+        with:
+          toolchain: stable
+          target: aarch64-apple-darwin
+
+      - name: Build release binary
+        run: cargo build --release --target aarch64-apple-darwin # Build your app for macOS
+
+      - name: Package binary
+        run: |
+          cd target/aarch64-apple-darwin/
+          mv ./release meaty_ore
+          cp -pr ../../assets ./meaty_ore/
+          tar -czf meaty-ore-game-macos-arm.tar.gz ./meaty_ore/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-build-intel
+          path: target/aarch64-apple-darwin/meaty-ore-game-macos-arm.tar.gz
