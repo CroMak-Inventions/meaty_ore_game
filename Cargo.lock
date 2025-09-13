@@ -2656,6 +2656,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "meaty_ore"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "rand 0.9.1",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3805,14 +3813,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd538fb6910ac1099850255cf94a94df6551fbdd602454387d0adb2d1ca6dead"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "spaceship_game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "rand 0.9.1",
 ]
 
 [[package]]
