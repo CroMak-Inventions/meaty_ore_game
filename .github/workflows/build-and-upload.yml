@@ -10,16 +10,28 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_ubuntu:
+  build_ubuntu_intel:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+
+      - name: Build release binary
+        run: cargo build --release --target x86_64-unknown-linux-gnu # Build for Linux
+
+      - name: Package binary
+        run: |
+          cd target/x86_64-unknown-linux-gnu/
+          mv ./release meaty_ore
+          cp -pr ../../assets ./meaty_ore/
+          tar -czf meaty-ore-game-linux-intel.tar.gz ./meaty_ore/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-intel
+          path: target/x86_64-unknown-linux-gnu/meaty-ore-game-macos-intel.tar.gz
 
   build_macos_intel:
     runs-on: macos-latest # Use a macOS runner
