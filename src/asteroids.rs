@@ -22,7 +22,7 @@ use crate::{
 const VELOCITY_SCALAR: f32 = 5.0;
 const ACCELERATION_SCALAR: f32 = 1.0;
 const SPAWN_RANGE_X: Range<f32> =  -25.0..25.0;
-const SPAWN_RANGE_Z: Range<f32> = 0.0..25.0;
+const SPAWN_RANGE_Z: Range<f32> = -25.0..25.0;
 const SPAWN_TIME_SECONDS: f32 = 4.0;
 const MAX_ROTATE_SPEED: f32 = 3.0;
 const RADIUS: f32 = 1.5;
@@ -128,7 +128,7 @@ fn spawn_asteroid(
         // at least once per game.
         let distance = translation.distance(spaceship_xform.translation);
 
-        if distance >= SPACESHIP_RADIUS * 2.0 {
+        if distance >= SPACESHIP_RADIUS * 4.0 {
             break;
         }
         else {
