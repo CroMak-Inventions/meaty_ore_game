@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod ambient_sound;
+mod app_setup;
 mod asset_loader;
 mod asteroids;
 mod camera;
@@ -19,6 +20,7 @@ mod debug;
 
 
 use ambient_sound::AmbientSoundPlugin;
+use app_setup::AppSetupPlugin;
 use asset_loader::AssetLoaderPlugin;
 use asteroids::AsteroidPlugin;
 use camera::CameraPlugin;
@@ -34,18 +36,11 @@ use spaceship::SpaceshipPlugin;
 use state::StatePlugin;
 use debug::DebugPlugin;
 
+
 fn main() {
     App::new()
-        // System defined plugings
-        .insert_resource(ClearColor(Color::linear_rgb(0.0005,0.0,0.005)))
-        .insert_resource(AmbientLight {
-            color: Color::default(),
-            brightness: 250.0,
-            affects_lightmapped_meshes: true
-        })
-        .add_plugins(DefaultPlugins)
-        // User defined plugins
         .add_plugins((
+            AppSetupPlugin,
             AssetLoaderPlugin,
             MovementPlugin,
             SpaceshipPlugin,
