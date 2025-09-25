@@ -1,5 +1,6 @@
 use bevy::{
     prelude::*,
+    app::AppExit,
     audio::Volume,
 };
 
@@ -26,6 +27,9 @@ impl Plugin for GameOverPlugin {
         .add_systems(OnEnter(GameState::StartGame), hide_game_over_dlg)
         .add_systems(Update,
             hit_any_key.run_if(in_state(GameState::GameOver)),
+        )
+        .add_systems(Update,
+            quit_game.run_if(in_state(GameState::QuitGame))
         );
     }
 }
@@ -75,7 +79,22 @@ fn spawn_game_over_dlg(
         ))
         .with_child((
             Text::new("Press <Enter> to start new game."),
-            // "default_font" feature is unavailable, load a font to use instead.
+            TextFont { 
+                font: scene_assets.font.clone(),
+                font_size: 22.0,
+                ..Default::default()
+            },
+        ));
+
+        builder.spawn((
+            Node {
+                padding: UiRect::axes(Val::Px(5.), Val::Px(1.)),
+                ..default()
+            },
+            //BackgroundColor(Color::linear_rgb(0.5, 0.5, 0.5)),
+        ))
+        .with_child((
+            Text::new("Press Q to quit."),
             TextFont { 
                 font: scene_assets.font.clone(),
                 font_size: 22.0,
@@ -117,4 +136,13 @@ fn hit_any_key(
     if keyboard_input.pressed(KeyCode::Enter) {
         game_state.set(GameState::StartGame);
     }
+    else if keyboard_input.pressed(KeyCode::KeyQ) {
+        game_state.set(GameState::QuitGame);
+    }
+}
+
+fn quit_game(
+    mut app_exit_events: ResMut<Events<AppExit>>
+) {
+    app_exit_events.send(AppExit::Success);
 }

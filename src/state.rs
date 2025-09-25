@@ -8,6 +8,7 @@ pub enum GameState {
     Paused,
     GameOver,
     StartGame,
+    QuitGame,
 }
 
 pub struct StatePlugin;
