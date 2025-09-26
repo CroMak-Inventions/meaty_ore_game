@@ -24,12 +24,14 @@ impl Plugin for GameOverPlugin {
             show_game_over_dlg,
             mute_thruster_sound,
         ))
-        .add_systems(OnEnter(GameState::StartGame), hide_game_over_dlg)
+        .add_systems(OnEnter(GameState::StartGame),
+            hide_game_over_dlg
+        )
         .add_systems(Update,
             hit_any_key.run_if(in_state(GameState::GameOver)),
         )
-        .add_systems(Update,
-            quit_game.run_if(in_state(GameState::QuitGame))
+        .add_systems(OnEnter(GameState::QuitGame),
+        quit_game
         );
     }
 }
