@@ -25,8 +25,9 @@ jobs:
       - name: Package binary
         run: |
           cd target/x86_64-unknown-linux-gnu/
-          mv ./release meaty_ore
+          mkdir ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
+          cp -pr ./release/meaty_ore* ./meaty_ore/          
           tar -czf meaty-ore-game-linux-intel.tar.gz ./meaty_ore/
 
       - name: Upload artifact
@@ -53,8 +54,9 @@ jobs:
       - name: Package binary
         run: |
           cd target/x86_64-apple-darwin/
-          mv ./release meaty_ore
+          mkdir ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
+          cp -pr ./release/meaty_ore* ./meaty_ore/
           tar -czf meaty-ore-game-macos-intel.tar.gz ./meaty_ore/
 
       - name: Upload artifact
@@ -81,8 +83,9 @@ jobs:
       - name: Package binary
         run: |
           cd target/aarch64-apple-darwin/
-          mv ./release meaty_ore
+          mkdir ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
+          cp -pr ./release/meaty_ore* ./meaty_ore/
           tar -czf meaty-ore-game-macos-arm.tar.gz ./meaty_ore/
 
       - name: Upload artifact
