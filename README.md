@@ -1,3 +1,5 @@
+This meteor may or may not contain meaty ore!!!
+
 This is an Asteroids-styled arcade game programmed in Rust &amp; Bevy
 
 It was inspired from the Bevy Basics Series of videos on YouTube by
