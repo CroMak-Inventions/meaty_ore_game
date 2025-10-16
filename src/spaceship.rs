@@ -25,6 +25,7 @@ use crate::{
 const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 pub const SPACESHIP_RADIUS: f32 = 2.5;
+const SPACESHIP_SIZE: f32 = 0.8;
 const SPACESHIP_SPEED: f32 = 25.0;
 const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
 const SPACESHIP_ROLL_SPEED: f32 = 2.5;
@@ -34,7 +35,7 @@ const SPACESHIP_COLLISION_DAMAGE: f32 = 100.0;
 const MISSILE_SPEED: f32 = 50.0;
 const MISSILE_RATE: f32 = 4.0;  // shots per second
 const MISSILE_MAX: usize = 3;  // maximum number of missiles allowed in the air
-const MISSILE_FORWARD_SPAWN_SCALAR: f32 = 6.3;
+const MISSILE_FORWARD_SPAWN_SCALAR: f32 = 5.0;
 const MISSILE_RADIUS: f32 = 0.5;
 const MISSILE_HEALTH: f32 = 1.0;
 const MISSILE_COLLISION_DAMAGE: f32 = 5.0;
@@ -86,6 +87,12 @@ impl Plugin for SpaceshipPlugin {
 }
 
 fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
+    let spaceship_xform = Transform::from_translation(
+        STARTING_TRANSLATION
+    ).with_scale(
+        Vec3::ONE * SPACESHIP_SIZE
+    );
+
     commands.spawn((
         MovingObjectBundle {
             velocity: Velocity::new(STARTING_VELOCITY),
@@ -94,7 +101,7 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
             collider: Collider::new(SPACESHIP_RADIUS),
             model: SceneBundle {
                 scene: SceneRoot(scene_assets.spaceship.clone()),
-                transform: Transform::from_translation(STARTING_TRANSLATION),
+                transform: spaceship_xform,
             }
         },
         Spaceship,
