@@ -23,6 +23,7 @@ jobs:
 
       - name: Build release binary
         run: |
+          sudo apt-get update -y
           sudo apt-get install -yqq alsa librust-alsa-dev librust-alsa-sys-dev libudev-dev
           cargo build --release --target x86_64-unknown-linux-gnu # Build for Linux
 
