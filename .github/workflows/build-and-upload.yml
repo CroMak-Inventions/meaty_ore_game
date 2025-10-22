@@ -29,8 +29,8 @@ jobs:
         run: |
           cd target/x86_64-pc-windows-msvc/
           mkdir ./meaty_ore
-          Copy-Item -Path ../../assets -Destination ./meaty_ore/
-          Copy-Item -Path ./release/meaty_ore* -Destination ./meaty_ore/
+          Copy-Item -Path ../../assets -Destination ./meaty_ore/ -Recurse
+          Copy-Item -Path ./release/meaty_ore.exe -Destination ./meaty_ore/
 
           Compress-Archive -Path ./meaty_ore -DestinationPath meaty-ore-game-windows-x86_64.zip
 
