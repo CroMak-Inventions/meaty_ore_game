@@ -10,12 +10,42 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_ubuntu_intel:
+  build_windows:
+    runs-on: windows-latest
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Install Dependencies
+        run: |
+          #rustup target add x86_64-pc-windows-msvc  # Windows
+
+      - name: Build for Windows
+        run: |
+          cargo build --release --target x86_64-pc-windows-msvc
+
+      - name: Zip Windows Artifact
+        run: |
+          cd target/x86_64-pc-windows-msvc/
+          mkdir ./meaty_ore
+          Copy-Item -Path ../../assets -Destination ./meaty_ore/
+          Copy-Item -Path ./release/meaty_ore* -Destination ./meaty_ore/
+
+          Compress-Archive -Path ./meaty_ore -DestinationPath meaty-ore-game-windows-x86_64.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: |
+            ./target/x86_64-pc-windows-msvc/meaty-ore-game-windows-x86_64.zip
+
+  build_ubuntu_intel:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -45,7 +75,7 @@ jobs:
     runs-on: macos-latest # Use a macOS runner
 
     steps:
-      - uses: actions/checkout@v4 # Checkout your repository
+      - uses: actions/checkout@v5 # Checkout your repository
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
@@ -74,7 +104,7 @@ jobs:
     runs-on: macos-latest # Use a macOS runner
 
     steps:
-      - uses: actions/checkout@v4 # Checkout your repository
+      - uses: actions/checkout@v5 # Checkout your repository
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
