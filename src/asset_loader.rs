@@ -4,6 +4,8 @@ use bevy::prelude::*;
 pub struct SceneAssets {
     pub asteroid: Handle<Scene>,
     pub spaceship: Handle<Scene>,
+    pub saucer: Handle<Scene>,
+    pub explosion: Handle<Scene>,
     pub missiles: Handle<Scene>,
     pub shooting_sound: Handle<AudioSource>,
     pub meteor_hit_sound: Handle<AudioSource>,
@@ -28,6 +30,8 @@ fn load_assets(
     *scene_assets = SceneAssets {
         asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
         spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("SpaceshipNew.glb")),
+        saucer: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Saucer.v2.glb")),
+        explosion: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Explosion.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
         shooting_sound: asset_server.load("sound/Shoot-2.ogg"),
         meteor_hit_sound: asset_server.load("sound/MeteorHit-3.ogg"),

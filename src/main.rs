@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod ambient_sound;
+mod app_globals;
 mod app_setup;
 mod asset_loader;
 mod asteroids;
@@ -20,6 +21,7 @@ mod debug;
 
 
 use ambient_sound::AmbientSoundPlugin;
+use app_globals::AppGlobalsPlugin;
 use app_setup::AppSetupPlugin;
 use asset_loader::AssetLoaderPlugin;
 use asteroids::AsteroidPlugin;
@@ -41,6 +43,7 @@ fn main() {
     App::new()
         .add_plugins((
             AppSetupPlugin,
+            AppGlobalsPlugin,
             AssetLoaderPlugin,
             MovementPlugin,
             SpaceshipPlugin,
@@ -54,6 +57,9 @@ fn main() {
             SoundFXPlugin,
             AmbientSoundPlugin,
             ScorePlugin,
+        ))
+        .add_plugins((
+            // max 15 plugins in a tuple, so we split it up.
             GameOverPlugin,
             //DebugPlugin,
         ))

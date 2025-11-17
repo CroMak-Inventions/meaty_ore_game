@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::{
+    app_globals::AppGlobals,
     asset_loader::SceneAssets,
     collision_detection::{Collider, CollisionDamage},
     health::Health,
@@ -40,6 +41,11 @@ pub struct AsteroidSpawnTimer {
 #[derive(Component, Debug)]
 pub struct AsteroidDebris;
 
+#[derive(Component, Debug)]
+pub struct Explosion {
+    pub duration: i32,  // in frames
+}
+
 #[derive(Event, Debug)]
 pub struct AsteroidCollisionAnimationEvent {
     pub xform: Transform,
@@ -73,6 +79,7 @@ impl Plugin for AsteroidPlugin {
                 rotate_passive_objects::<Asteroid>,
                 rotate_passive_objects::<AsteroidDebris>,
                 spawn_collision_animation,
+                update_explosion_animation,
             ).in_set(InGameSet::EntityUpdates),
         )
         .add_event::<AsteroidCollisionAnimationEvent>();
@@ -83,9 +90,10 @@ fn spawn_asteroids(
     mut commands: Commands,
     spaceship_xform: Single<&Transform, With<Spaceship>>,
     asteroids: Query<Entity, With<Asteroid>>,
-    mut spawn_timer: ResMut<AsteroidSpawnTimer>,
-    time: Res<Time>,
     scene_assets: Res<SceneAssets>,
+    mut spawn_timer: ResMut<AsteroidSpawnTimer>,
+    mut app_globals: ResMut<AppGlobals>,
+    time: Res<Time>,
 ) {
     // We are setting up a game dynamic where a wave of asteroids, up to
     // about 10 or so, is spawned all at once.  Enough that it is challanging,
@@ -98,7 +106,15 @@ fn spawn_asteroids(
     }
 
     if asteroids.iter().len() == 0 {
-        // All asteroids have been cleared.  Time to spawn.
+        // All asteroids have been cleared.  New level.
+        app_globals.level += 1;
+        println!("New level: {:}", app_globals.level);
+
+        if app_globals.level % 4 == 0 {
+            println!("\tBoss Level Time!!");
+        }
+
+        // Spawn a new wave of asteroids.
         for _i in 0..10 {
             // spawn an asteroid
             spawn_asteroid(&mut commands, &spaceship_xform, &scene_assets.asteroid);
@@ -208,9 +224,9 @@ fn spawn_collision_animation(
 
         commands.spawn((
             MovingObjectBundle {
-                velocity: debris_velocity,
+                velocity: debris_velocity.clone(),
                 acceleration: Acceleration::from(acceleration.clone()),
-                rotation: rotation,
+                rotation: rotation.clone(),
                 collider: Collider::new(RADIUS),
                 model: SceneBundle {
                     scene: SceneRoot(scene_assets.asteroid.clone()),
@@ -219,5 +235,32 @@ fn spawn_collision_animation(
             },
             AsteroidDebris,
         ));
+
+        commands.spawn((
+            MovingObjectBundle {
+                velocity: velocity.clone(),
+                acceleration: Acceleration::from(acceleration.clone()),
+                rotation: rotation.clone(),
+                collider: Collider::new(RADIUS),
+                model: SceneBundle {
+                    scene: SceneRoot(scene_assets.explosion.clone()),
+                    transform: debris_xform,
+                },
+            },
+            Health::new(HEALTH),
+            Explosion {duration: 0},
+        ));
+
+    }
+}
+
+fn update_explosion_animation(
+    mut query: Query<(&mut Explosion, &mut Health, &mut Transform), With<Explosion>>,
+    time: Res<Time>,
+) {
+    for (mut explosion, mut health, mut xform) in query.iter_mut() {
+        explosion.duration += 1;
+        health.value -= 80.0 * time.delta_secs();
+        xform.scale *= 1.0 + (6.0 * time.delta_secs());
     }
 }

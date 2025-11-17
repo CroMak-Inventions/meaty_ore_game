@@ -6,7 +6,7 @@ use crate::{
     movement::{Acceleration, Velocity},
     schedule::InGameSet,
     sound_fx::AsteroidCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile}
+    spaceship::{Spaceship, SpaceshipMissile},
 };
 
 
@@ -131,7 +131,7 @@ pub fn handle_collision_event(
     mut animation_event_writer: EventWriter<AsteroidCollisionAnimationEvent>,
     mut health_query: Query<&mut Health>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
-    missile_query: Query<(&Transform, &SpaceshipMissile)>,
+    missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
     collision_damage_query: Query<&CollisionDamage>
 ) {
     for &CollisionEvent {
@@ -154,7 +154,7 @@ pub fn handle_collision_event(
 
         // now we send out a collistion animation.  We only do this for missile
         // collisions, which is why we query for the missile.
-        let Ok((xform, _missile)) = missile_query.get(entity) else {
+        let Ok(xform) = missile_query.get(entity) else {
             continue;
         };
 

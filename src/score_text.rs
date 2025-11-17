@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    app_globals::AppGlobals,
     asset_loader::SceneAssets,
     asteroids::Asteroid,
     health::Health,
@@ -8,42 +9,13 @@ use crate::{
 };
 
 #[derive(Component, Debug)]
-pub struct Score {
-    pub value: i32,
-}
-
-impl Score {
-    pub fn new(value: i32) -> Self {
-        Self { value }
-    }
-}
-
+pub struct Score ;
 
 #[derive(Component, Debug)]
-pub struct LastScore {
-    pub value: i32,
-}
-
-impl LastScore {
-    pub fn new(value: i32) -> Self {
-        Self { value }
-    }
-}
-
-
+pub struct LastScore;
 
 #[derive(Component, Debug)]
-pub struct HighScore {
-    pub value: i32,
-}
-
-impl HighScore {
-    pub fn new(value: i32) -> Self {
-        Self { value }
-    }
-}
-
-
+pub struct HighScore;
 
 pub struct ScorePlugin;
 
@@ -91,7 +63,7 @@ fn spawn_score(
                 ..Default::default()
             },
         ),
-        Score::new(0),
+        Score,
     ));
 
     commands.spawn((
@@ -125,7 +97,7 @@ fn spawn_score(
                 ..Default::default()
             },
         ),
-        HighScore::new(0),
+        HighScore,
     ));
 
     commands.spawn((
@@ -159,59 +131,50 @@ fn spawn_score(
                 ..Default::default()
             },
         ),
-        LastScore::new(0),
+        LastScore,
     ));
 
 }
 
 fn update_score(
-    mut query: Query<(&mut TextSpan, &mut Score), With<Score>>,
+    mut query: Query<&mut TextSpan, With<Score>>,
     asteroid_query: Query<&Health, With<Asteroid>>,
+    mut app_globals: ResMut<AppGlobals>,
 ) {
-    let Ok((
-        mut span,
-        mut score
-    )) = query.single_mut() else {
+    let Ok(mut span,) = query.single_mut() else {
         return;
     };
 
     for health in asteroid_query.iter() {
         if health.value <= 0.0 {
-            score.value += 1;
+            app_globals.score += 1;
         }
     }
 
-    **span = format!("{:}", score.value);
+    **span = format!("{:}", app_globals.score);
 }
 
 fn reset_score(
-    mut score_query: Query<(&mut TextSpan, &mut Score), With<Score>>,
-    mut last_score_query: Query<(&mut TextSpan, &mut LastScore), (With<LastScore>, Without<Score>)>,
-    mut high_score_query: Query<(&mut TextSpan, &mut HighScore), (With<HighScore>, Without<Score>, Without<LastScore>)>,
+    mut score_query: Query<&mut TextSpan, With<Score>>,
+    mut last_score_query: Query<&mut TextSpan, (With<LastScore>, Without<Score>)>,
+    mut high_score_query: Query<&mut TextSpan, (With<HighScore>, Without<Score>, Without<LastScore>)>,
+    mut app_globals: ResMut<AppGlobals>,
 ) {
-    let Ok((mut score_span, mut score)) = score_query.single_mut() else {
+    let Ok(mut score_span) = score_query.single_mut() else {
         return;
     };
 
-    let Ok((mut last_score_span, mut last_score)) = last_score_query.single_mut() else {
+    let Ok(mut last_score_span) = last_score_query.single_mut() else {
         return;
     };
 
-    // always set the last score
-    last_score.value = score.value;
-    **last_score_span = format!("{:}", last_score.value);
-
-    let Ok((mut high_score_span, mut high_score)) = high_score_query.single_mut() else {
+    let Ok(mut high_score_span) = high_score_query.single_mut() else {
         return;
     };
 
-    // set the high score if we beat it
-    if score.value > high_score.value {
-        high_score.value = score.value;
-        **high_score_span = format!("{:}", high_score.value);
-    }
-    
-    // always zero out the current score
-    score.value = 0;
-    **score_span = format!("{:}", score.value);
+    app_globals.final_score_update();
+
+    **last_score_span = format!("{:}", app_globals.last_score);
+    **high_score_span = format!("{:}", app_globals.high_score);
+    **score_span = format!("{:}", app_globals.score);
 }
