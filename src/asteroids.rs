@@ -260,7 +260,7 @@ fn update_explosion_animation(
 ) {
     for (mut explosion, mut health, mut xform) in query.iter_mut() {
         explosion.duration += 1;
-        health.value -= 80.0 * time.delta_secs();
-        xform.scale *= 1.0 + (6.0 * time.delta_secs());
+        health.value -= 160.0 * time.delta_secs();
+        xform.scale *= 1.0 + (12.0 * time.delta_secs());
     }
 }
