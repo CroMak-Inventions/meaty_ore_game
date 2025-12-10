@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use bevy::audio::{PlaybackMode, Volume};
 
 use crate::asset_loader::SceneAssets;
+
 
 #[derive(Component, Debug)]
 pub struct GameAmbientSound;
@@ -24,13 +26,21 @@ fn spawn_ambient_sound(
 ) {
     commands.spawn((
         AudioPlayer::new(scene_assets.background_music.clone()),
-        PlaybackSettings::LOOP,
+        PlaybackSettings {
+            mode: PlaybackMode::Loop,
+            volume: Volume::Linear(1.0),
+            ..default()
+        },
         GameAmbientSound,
     ));
 
     commands.spawn((
         AudioPlayer::new(scene_assets.thruster_sound.clone()),
-        PlaybackSettings::LOOP,
+        PlaybackSettings {
+            mode: PlaybackMode::Loop,
+            volume: Volume::Linear(1.0),
+            ..default()
+        },
         ThrusterSound,
     ));
 }

@@ -1,8 +1,5 @@
 use bevy::prelude::*;
 
-use crate::{
-    app_globals::AppGlobals,
-};
 
 #[derive(Debug, Default, Hash, Eq, PartialEq, Clone, States)]
 pub enum GameState {

@@ -2,7 +2,6 @@ use rand::Rng;
 
 use bevy::{
     prelude::*,
-    render::camera::CameraProjection
 };
 
 use crate::{

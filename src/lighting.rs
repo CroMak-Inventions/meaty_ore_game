@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::pbr::CascadeShadowConfigBuilder;
+use bevy::light::CascadeShadowConfigBuilder;
 
 
 pub struct LightingPlugin;

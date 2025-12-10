@@ -144,7 +144,7 @@ fn hit_any_key(
 }
 
 fn quit_game(
-    mut app_exit_events: ResMut<Events<AppExit>>
+    mut app_exit_events: ResMut<Messages<AppExit>>
 ) {
-    app_exit_events.send(AppExit::Success);
+    app_exit_events.write(AppExit::Success);
 }

@@ -1,6 +1,5 @@
 use bevy::{
     prelude::*,
-    render::camera::CameraProjection,
     audio::Volume,
 };
 
@@ -167,7 +166,7 @@ fn spaceship_weapon_controls(
     query: Query<&Transform, With<Spaceship>>,
     missile_query: Query<(), With<SpaceshipMissile>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut sound_event_writer: EventWriter<ShootingSoundEvent>,
+    mut sound_event_writer: MessageWriter<ShootingSoundEvent>,
     scene_assets: Res<SceneAssets>,
 ) {
     rate_timer.timer.tick(time.delta());
@@ -177,7 +176,7 @@ fn spaceship_weapon_controls(
     };
 
     if keyboard_input.pressed(KeyCode::Space) &&
-       rate_timer.timer.finished()
+       rate_timer.timer.is_finished()
     {
         let missile_number = missile_query.iter().len();
 
@@ -282,7 +281,7 @@ fn spaceship_thruster_sound_control(
         KeyCode::KeyW,
         KeyCode::KeyS,
     ]) {
-        sink.set_volume(Volume::Linear(1.5));
+        sink.set_volume(Volume::Linear(1.0));
     } else {
         sink.set_volume(Volume::Linear(0.0));
     }

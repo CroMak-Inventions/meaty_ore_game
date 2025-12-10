@@ -46,7 +46,7 @@ pub struct Explosion {
     pub duration: i32,  // in frames
 }
 
-#[derive(Event, Debug)]
+#[derive(Message, Debug)]
 pub struct AsteroidCollisionAnimationEvent {
     pub xform: Transform,
     pub velocity: Velocity,
@@ -82,7 +82,7 @@ impl Plugin for AsteroidPlugin {
                 update_explosion_animation,
             ).in_set(InGameSet::EntityUpdates),
         )
-        .add_event::<AsteroidCollisionAnimationEvent>();
+        .add_message::<AsteroidCollisionAnimationEvent>();
     }
 }
 
@@ -199,7 +199,7 @@ fn rotate_passive_objects<T: Component>(
 }
 
 fn spawn_collision_animation(
-    mut animation_event_reader: EventReader<AsteroidCollisionAnimationEvent>,
+    mut animation_event_reader: MessageReader<AsteroidCollisionAnimationEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {

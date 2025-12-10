@@ -36,7 +36,7 @@ impl CollisionDamage {
     }
 }
 
-#[derive(Event, Debug)]
+#[derive(Message, Debug)]
 pub struct CollisionEvent {
     pub entity: Entity,
     pub collided_entity: Entity,
@@ -68,7 +68,7 @@ impl Plugin for CollisionDetectionPlugin {
             .chain()
             .in_set(InGameSet::EntityUpdates),
         )
-        .add_event::<CollisionEvent>();
+        .add_message::<CollisionEvent>();
     }
 }
 
@@ -107,7 +107,7 @@ fn collision_detection(
 
 
 fn dispatch_collistion_events<T: Component>(
-    mut collision_event_writer: EventWriter<CollisionEvent>,
+    mut collision_event_writer: MessageWriter<CollisionEvent>,
     query: Query<(Entity, &Collider), With<T>>
 ) {
     for (entity, collider) in query.iter() {
@@ -126,9 +126,9 @@ fn dispatch_collistion_events<T: Component>(
 }
 
 pub fn handle_collision_event(
-    mut collision_event_reader: EventReader<CollisionEvent>,
-    mut sound_event_writer: EventWriter<AsteroidCollisionSoundEvent>,
-    mut animation_event_writer: EventWriter<AsteroidCollisionAnimationEvent>,
+    mut collision_event_reader: MessageReader<CollisionEvent>,
+    mut sound_event_writer: MessageWriter<AsteroidCollisionSoundEvent>,
+    mut animation_event_writer: MessageWriter<AsteroidCollisionAnimationEvent>,
     mut health_query: Query<&mut Health>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,

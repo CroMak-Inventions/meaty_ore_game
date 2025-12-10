@@ -17,10 +17,10 @@ pub struct GameSoundEffects {
 
 // in the future, we will have multiple sounds.  It might make sense
 // for the type of sound to be an enum and stored in the event.
-#[derive(Event, Debug)]
+#[derive(Message, Debug)]
 pub struct ShootingSoundEvent;
 
-#[derive(Event, Debug)]
+#[derive(Message, Debug)]
 pub struct AsteroidCollisionSoundEvent;
 
 
@@ -37,8 +37,8 @@ impl Plugin for SoundFXPlugin {
                 set_sound_fx_volume,
             ).in_set(InGameSet::EntityUpdates),
         )
-        .add_event::<ShootingSoundEvent>()
-        .add_event::<AsteroidCollisionSoundEvent>();
+        .add_message::<ShootingSoundEvent>()
+        .add_message::<AsteroidCollisionSoundEvent>();
     }
 }
 
@@ -54,7 +54,7 @@ impl Plugin for SoundFXPlugin {
 // .....Well......OK.....
 //
 fn play_shooting_sound(
-    mut sound_event_reader: EventReader<ShootingSoundEvent>,
+    mut sound_event_reader: MessageReader<ShootingSoundEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {
@@ -70,7 +70,7 @@ fn play_shooting_sound(
 }
 
 fn play_meteor_collision_sound(
-    mut sound_event_reader: EventReader<AsteroidCollisionSoundEvent>,
+    mut sound_event_reader: MessageReader<AsteroidCollisionSoundEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {
