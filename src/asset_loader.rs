@@ -7,9 +7,11 @@ pub struct SceneAssets {
     pub saucer: Handle<Scene>,
     pub explosion: Handle<Scene>,
     pub missiles: Handle<Scene>,
+    pub saucer_missile: Handle<Scene>,
     pub shooting_sound: Handle<AudioSource>,
     pub meteor_hit_sound: Handle<AudioSource>,
     pub thruster_sound: Handle<AudioSource>,
+    pub saucer_sound: Handle<AudioSource>,
     pub background_music: Handle<AudioSource>,
     pub font: Handle<Font>,
 }
@@ -33,9 +35,11 @@ fn load_assets(
         saucer: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Saucer.v2.glb")),
         explosion: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Explosion.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
+        saucer_missile: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Saucer-Missile.glb")),
         shooting_sound: asset_server.load("sound/Shoot-2.ogg"),
         meteor_hit_sound: asset_server.load("sound/MeteorHit-3.ogg"),
         thruster_sound: asset_server.load("sound/Rocket.ogg"),
+        saucer_sound: asset_server.load("sound/UFO-Saucer-SFX.ogg"),
         background_music: asset_server.load("sound/CryForMercyButTheClockTicksDown.ogg"),
         font: asset_server.load("fonts/fira-sans.bold.ttf"),
     }

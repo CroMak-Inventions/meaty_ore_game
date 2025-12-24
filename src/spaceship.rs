@@ -21,8 +21,8 @@ use crate::{
 };
 
 
-const STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
-const STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+const SPACESHIP_STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
+const SPACESHIP_STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 pub const SPACESHIP_RADIUS: f32 = 2.5;
 const SPACESHIP_SIZE: f32 = 0.8;
 const SPACESHIP_SPEED: f32 = 25.0;
@@ -87,14 +87,14 @@ impl Plugin for SpaceshipPlugin {
 
 fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     let spaceship_xform = Transform::from_translation(
-        STARTING_TRANSLATION
+        SPACESHIP_STARTING_TRANSLATION
     ).with_scale(
         Vec3::ONE * SPACESHIP_SIZE
     );
 
     commands.spawn((
         MovingObjectBundle {
-            velocity: Velocity::new(STARTING_VELOCITY),
+            velocity: Velocity::new(SPACESHIP_STARTING_VELOCITY),
             acceleration: Acceleration::new(Vec3::ZERO),
             rotation: Rotation::new(0.0, 0.0, 0.0),
             collider: Collider::new(SPACESHIP_RADIUS),
@@ -163,7 +163,7 @@ fn spaceship_weapon_controls(
     mut commands: Commands,
     mut rate_timer: ResMut<MissileRateTimer>,
     time: Res<Time>,
-    query: Query<&Transform, With<Spaceship>>,
+    spaceship_query: Query<&Transform, With<Spaceship>>,
     missile_query: Query<(), With<SpaceshipMissile>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut sound_event_writer: MessageWriter<ShootingSoundEvent>,
@@ -171,7 +171,7 @@ fn spaceship_weapon_controls(
 ) {
     rate_timer.timer.tick(time.delta());
 
-    let Ok(transform) = query.single() else {
+    let Ok(spaceship_xform) = spaceship_query.single() else {
         return;
     };
 
@@ -184,13 +184,13 @@ fn spaceship_weapon_controls(
             rate_timer.timer.reset();
 
             let mut missile_xform = Transform::from_translation(
-                transform.translation + -transform.forward() * MISSILE_FORWARD_SPAWN_SCALAR,
+                spaceship_xform.translation + -spaceship_xform.forward() * MISSILE_FORWARD_SPAWN_SCALAR,
             );
-            missile_xform.rotate(transform.rotation);
+            missile_xform.rotate(spaceship_xform.rotation);
 
             commands.spawn((
                 MovingObjectBundle {
-                    velocity: Velocity::new(-transform.forward() * MISSILE_SPEED),
+                    velocity: Velocity::new(-spaceship_xform.forward() * MISSILE_SPEED),
                     acceleration: Acceleration::new(Vec3::ZERO),
                     rotation: Rotation::new(0.0, 0.0, 0.0),
                     collider: Collider::new(MISSILE_RADIUS),

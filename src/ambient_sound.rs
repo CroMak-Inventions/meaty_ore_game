@@ -10,6 +10,9 @@ pub struct GameAmbientSound;
 #[derive(Component, Debug)]
 pub struct ThrusterSound;
 
+#[derive(Component, Debug)]
+pub struct SaucerSound;
+
 pub struct AmbientSoundPlugin;
 
 impl Plugin for AmbientSoundPlugin {
@@ -42,5 +45,15 @@ fn spawn_ambient_sound(
             ..default()
         },
         ThrusterSound,
+    ));
+
+    commands.spawn((
+        AudioPlayer::new(scene_assets.saucer_sound.clone()),
+        PlaybackSettings {
+            mode: PlaybackMode::Loop,
+            volume: Volume::Linear(1.0),
+            ..default()
+        },
+        SaucerSound,
     ));
 }

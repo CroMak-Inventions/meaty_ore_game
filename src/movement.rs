@@ -7,8 +7,9 @@ use bevy::{
 use crate::{
     asteroids::Asteroid,
     collision_detection::Collider,
+    saucer::Saucer,
     schedule::InGameSet,
-    spaceship::Spaceship
+    spaceship::Spaceship,
 };
 
 
@@ -83,6 +84,7 @@ impl Plugin for MovementPlugin {
                 update_position,
                 wrap_position::<Asteroid>,
                 wrap_position::<Spaceship>,
+                wrap_position::<Saucer>,
             )
             .chain()
             .in_set(InGameSet::EntityUpdates),

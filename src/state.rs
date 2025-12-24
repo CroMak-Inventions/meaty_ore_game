@@ -11,6 +11,7 @@ pub enum GameState {
     QuitGame,
 }
 
+
 pub struct StatePlugin;
 
 impl Plugin for StatePlugin {

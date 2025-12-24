@@ -12,6 +12,7 @@ mod game_over;
 mod health;
 mod lighting;
 mod movement;
+mod saucer;
 mod schedule;
 mod score_text;
 mod sound_fx;
@@ -31,6 +32,7 @@ use despawn::DespawnPlugin;
 use game_over::GameOverPlugin;
 use lighting::LightingPlugin;
 use movement::MovementPlugin;
+use saucer::SaucerPlugin;
 use schedule::SchedulePlugin;
 use score_text::ScorePlugin;
 use sound_fx::SoundFXPlugin;
@@ -48,11 +50,11 @@ fn main() {
             MovementPlugin,
             SpaceshipPlugin,
             AsteroidPlugin,
+            SaucerPlugin,
             CameraPlugin,
             CollisionDetectionPlugin,
             DespawnPlugin,
             SchedulePlugin,
-            StatePlugin,
             LightingPlugin,
             SoundFXPlugin,
             AmbientSoundPlugin,
@@ -60,6 +62,7 @@ fn main() {
         ))
         .add_plugins((
             // max 15 plugins in a tuple, so we split it up.
+            StatePlugin,
             GameOverPlugin,
             //DebugPlugin,
         ))

@@ -22,8 +22,8 @@ use crate::{
 
 const VELOCITY_SCALAR: f32 = 5.0;
 const ACCELERATION_SCALAR: f32 = 1.0;
-const SPAWN_RANGE_X: Range<f32> =  -25.0..25.0;
-const SPAWN_RANGE_Z: Range<f32> = -25.0..25.0;
+pub const SPAWN_RANGE_X: Range<f32> =  -25.0..25.0;
+pub const SPAWN_RANGE_Z: Range<f32> = -25.0..25.0;
 const SPAWN_TIME_SECONDS: f32 = 4.0;
 const MAX_ROTATE_SPEED: f32 = 3.0;
 const RADIUS: f32 = 1.5;
@@ -107,12 +107,8 @@ fn spawn_asteroids(
 
     if asteroids.iter().len() == 0 {
         // All asteroids have been cleared.  New level.
-        app_globals.level += 1;
         println!("New level: {:}", app_globals.level);
-
-        if app_globals.level % 4 == 0 {
-            println!("\tBoss Level Time!!");
-        }
+        app_globals.level += 1;
 
         // Spawn a new wave of asteroids.
         for _i in 0..10 {

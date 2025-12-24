@@ -4,9 +4,10 @@ use crate::{
     asteroids::{Asteroid, AsteroidCollisionAnimationEvent},
     health::Health,
     movement::{Acceleration, Velocity},
+    saucer::{Saucer, SaucerMissile},
     schedule::InGameSet,
     sound_fx::AsteroidCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile},
+    spaceship::{Spaceship, SpaceshipMissile}
 };
 
 
@@ -62,6 +63,8 @@ impl Plugin for CollisionDetectionPlugin {
                     dispatch_collistion_events::<Asteroid>,
                     dispatch_collistion_events::<Spaceship>,
                     dispatch_collistion_events::<SpaceshipMissile>,
+                    dispatch_collistion_events::<Saucer>,
+                    dispatch_collistion_events::<SaucerMissile>,
                 ),
                 handle_collision_event,
             )
