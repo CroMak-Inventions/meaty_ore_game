@@ -21,6 +21,9 @@ pub struct GameSoundEffects {
 pub struct ShootingSoundEvent;
 
 #[derive(Message, Debug)]
+pub struct SaucerShootingSoundEvent;
+
+#[derive(Message, Debug)]
 pub struct AsteroidCollisionSoundEvent;
 
 
@@ -33,11 +36,13 @@ impl Plugin for SoundFXPlugin {
             Update,
             (
                 play_shooting_sound,
+                play_saucer_shooting_sound,
                 play_meteor_collision_sound,
                 set_sound_fx_volume,
             ).in_set(InGameSet::EntityUpdates),
         )
         .add_message::<ShootingSoundEvent>()
+        .add_message::<SaucerShootingSoundEvent>()
         .add_message::<AsteroidCollisionSoundEvent>();
     }
 }
@@ -61,6 +66,22 @@ fn play_shooting_sound(
     for _ in sound_event_reader.read() {
         commands.spawn((
             AudioPlayer::new(scene_assets.shooting_sound.clone()),
+            GameSoundEffects {
+                volume_is_set: false,
+                volume: SOUND_EFFECTS_VOLUME,
+            },
+        ));
+    }
+}
+
+fn play_saucer_shooting_sound(
+    mut sound_event_reader: MessageReader<SaucerShootingSoundEvent>,
+    mut commands: Commands,
+    scene_assets: Res<SceneAssets>,
+) {
+    for _ in sound_event_reader.read() {
+        commands.spawn((
+            AudioPlayer::new(scene_assets.saucer_shooting_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
                 volume: SOUND_EFFECTS_VOLUME,

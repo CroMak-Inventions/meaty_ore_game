@@ -19,7 +19,7 @@ use crate::{
     },
     schedule::InGameSet,
     spaceship::Spaceship,
-    sound_fx::ShootingSoundEvent,
+    sound_fx::SaucerShootingSoundEvent,
 };
 
 
@@ -32,7 +32,7 @@ const SAUCER_SPAWN_TIME_SECONDS: f32 = 45.0;
 
 const SAUCER_MISSILE_FORWARD_SPAWN_SCALAR: f32 = 4.0;
 const SAUCER_MISSILE_RADIUS: f32 = 0.5;
-const SAUCER_MISSILE_SIZE: f32 = 0.25;
+const SAUCER_MISSILE_SIZE: f32 = 0.10;
 const SAUCER_MISSILE_RATE: f32 = 60.0;  // shots per second
 const SAUCER_MISSILE_SPEED: f32 = 40.0;
 const SAUCER_MISSILE_HEALTH: f32 = 1.0;
@@ -230,7 +230,7 @@ fn saucer_weapon_control(
 
     saucers: Query<&Transform, With<Saucer>>,
     spaceship_xform: Single<&Transform, With<Spaceship>>,
-    mut sound_event_writer: MessageWriter<ShootingSoundEvent>,
+    mut sound_event_writer: MessageWriter<SaucerShootingSoundEvent>,
     scene_assets: Res<SceneAssets>,
 
 ) {
@@ -269,7 +269,7 @@ fn saucer_weapon_control(
                     CollisionDamage::new(SAUCER_MISSILE_COLLISION_DAMAGE),
                 ));
 
-                sound_event_writer.write(ShootingSoundEvent);
+                sound_event_writer.write(SaucerShootingSoundEvent);
             }
         }
     }

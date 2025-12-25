@@ -31,13 +31,13 @@ const SPACESHIP_ROLL_SPEED: f32 = 2.5;
 const SPACESHIP_HEALTH: f32 = 100.0;
 const SPACESHIP_COLLISION_DAMAGE: f32 = 100.0;
 
-const MISSILE_SPEED: f32 = 50.0;
-const MISSILE_RATE: f32 = 4.0;  // shots per second
-const MISSILE_MAX: usize = 3;  // maximum number of missiles allowed in the air
 const MISSILE_FORWARD_SPAWN_SCALAR: f32 = 5.0;
 const MISSILE_RADIUS: f32 = 0.5;
+const MISSILE_SPEED: f32 = 50.0;
 const MISSILE_HEALTH: f32 = 1.0;
 const MISSILE_COLLISION_DAMAGE: f32 = 5.0;
+const MISSILE_RATE: f32 = 4.0;  // shots per second
+const MISSILE_MAX: usize = 3;  // maximum number of missiles allowed in the air
 
 
 #[derive(Component, Debug)]
