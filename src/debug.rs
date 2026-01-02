@@ -1,3 +1,4 @@
+#![cfg(feature = "debug")] # Only compile this file if the "debug" feature is enabled.
 use bevy::prelude::*;
 
 use crate::{

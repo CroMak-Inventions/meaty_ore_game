@@ -38,6 +38,7 @@ impl Acceleration {
 #[derive(Component, Debug, Clone)]
 pub struct Rotation {
     pub x: f32,
+    #[allow(dead_code)]
     pub y: f32,
     pub z: f32,
 }

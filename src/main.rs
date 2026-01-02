@@ -18,8 +18,8 @@ mod score_text;
 mod sound_fx;
 mod spaceship;
 mod state;
+#[cfg(feature = "debug")]
 mod debug;
-
 
 use ambient_sound::AmbientSoundPlugin;
 use app_globals::AppGlobalsPlugin;
@@ -38,6 +38,7 @@ use score_text::ScorePlugin;
 use sound_fx::SoundFXPlugin;
 use spaceship::SpaceshipPlugin;
 use state::StatePlugin;
+#[cfg(feature = "debug")]
 use debug::DebugPlugin;
 
 
@@ -64,7 +65,8 @@ fn main() {
             // max 15 plugins in a tuple, so we split it up.
             StatePlugin,
             GameOverPlugin,
-            //DebugPlugin,
+            #[cfg(feature = "debug")]
+            DebugPlugin,
         ))
         .run();
     
