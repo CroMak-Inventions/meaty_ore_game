@@ -12,84 +12,94 @@ env:
 jobs:
   build_windows:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Install Dependencies
-        run: |
-          #rustup target add x86_64-pc-windows-msvc  # Windows
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
+          override: true
 
       - name: Build for Windows
-        run: |
-          cargo build --release --target x86_64-pc-windows-msvc
+        run: cargo build --release --target x86_64-pc-windows-msvc
 
       - name: Zip Windows Artifact
+        shell: pwsh
         run: |
           cd target/x86_64-pc-windows-msvc/
           mkdir ./meaty_ore
           Copy-Item -Path ../../assets -Destination ./meaty_ore/ -Recurse
           Copy-Item -Path ./release/meaty_ore.exe -Destination ./meaty_ore/
-
           Compress-Archive -Path ./meaty_ore -DestinationPath meaty-ore-game-windows-x86_64.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
-          path: |
-            ./target/x86_64-pc-windows-msvc/meaty-ore-game-windows-x86_64.zip
+          path: ./target/x86_64-pc-windows-msvc/meaty-ore-game-windows-x86_64.zip
 
   build_ubuntu_intel:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rs/toolchain@v1
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          target: x86_64-unknown-linux-gnu
           override: true
 
-      - name: Build release binary
+      - name: Install system deps
         run: |
           sudo apt-get update -y
-          sudo apt-get install -yqq alsa librust-alsa-dev librust-alsa-sys-dev libudev-dev
-          cargo build --release --target x86_64-unknown-linux-gnu # Build for Linux
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            libasound2-dev \
+            libudev-dev \
+            libx11-dev \
+            libxkbcommon-dev \
+            libwayland-dev
+
+      - name: Build release binary
+        run: cargo build --release --target x86_64-unknown-linux-gnu
 
       - name: Package binary
         run: |
           cd target/x86_64-unknown-linux-gnu/
-          mkdir ./meaty_ore
+          mkdir -p ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
-          cp -pr ./release/meaty_ore* ./meaty_ore/          
+          cp -pr ./release/meaty_ore* ./meaty_ore/
           tar -czf meaty-ore-game-linux-intel.tar.gz ./meaty_ore/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-build-intel
-          path: target/x86_64-unknown-linux-gnu/meaty-ore-game-macos-intel.tar.gz
+          path: target/x86_64-unknown-linux-gnu/meaty-ore-game-linux-intel.tar.gz
 
   build_macos_intel:
-    runs-on: macos-latest # Use a macOS runner
-
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5 # Checkout your repository
+      - uses: actions/checkout@v5
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: x86_64-apple-darwin # Or aarch64-apple-darwin for Apple Silicon
+          target: x86_64-apple-darwin
+          override: true
 
       - name: Build release binary
-        run: cargo build --release --target x86_64-apple-darwin # Build your app for macOS
+        run: cargo build --release --target x86_64-apple-darwin
 
       - name: Package binary
         run: |
           cd target/x86_64-apple-darwin/
-          mkdir ./meaty_ore
+          mkdir -p ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
           cp -pr ./release/meaty_ore* ./meaty_ore/
           tar -czf meaty-ore-game-macos-intel.tar.gz ./meaty_ore/
@@ -101,24 +111,24 @@ jobs:
           path: target/x86_64-apple-darwin/meaty-ore-game-macos-intel.tar.gz
 
   build_macos_arm:
-    runs-on: macos-latest # Use a macOS runner
-
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5 # Checkout your repository
+      - uses: actions/checkout@v5
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1 # Install Rust using actions-rs/toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: aarch64-apple-darwin
+          override: true
 
       - name: Build release binary
-        run: cargo build --release --target aarch64-apple-darwin # Build your app for macOS
+        run: cargo build --release --target aarch64-apple-darwin
 
       - name: Package binary
         run: |
           cd target/aarch64-apple-darwin/
-          mkdir ./meaty_ore
+          mkdir -p ./meaty_ore
           cp -pr ../../assets ./meaty_ore/
           cp -pr ./release/meaty_ore* ./meaty_ore/
           tar -czf meaty-ore-game-macos-arm.tar.gz ./meaty_ore/
