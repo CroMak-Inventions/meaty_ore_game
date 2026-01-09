@@ -207,7 +207,7 @@ fn spawn_collision_animation(
         let mut rng = rand::rng();
 
         let mut debris_velocity = Velocity::from(velocity.clone());
-        debris_velocity.value *= rng.random_range(0.5..1.0);
+        debris_velocity.value *= rng.random_range(0.6..1.0);
 
         let mut debris_xform = Transform::from_translation(xform.translation);
         debris_xform.scale *= rng.random_range(0.1..0.4);
@@ -216,21 +216,6 @@ fn spawn_collision_animation(
             -MAX_ROTATE_SPEED / 2.0,
             MAX_ROTATE_SPEED / 2.0,
         );
-
-
-        commands.spawn((
-            MovingObjectBundle {
-                velocity: debris_velocity.clone(),
-                acceleration: Acceleration::from(acceleration.clone()),
-                rotation: rotation.clone(),
-                collider: Collider::new(RADIUS),
-                model: SceneBundle {
-                    scene: SceneRoot(scene_assets.asteroid.clone()),
-                    transform: debris_xform,
-                },
-            },
-            AsteroidDebris,
-        ));
 
         commands.spawn((
             MovingObjectBundle {
@@ -245,6 +230,20 @@ fn spawn_collision_animation(
             },
             Health::new(HEALTH),
             Explosion {duration: 0},
+        ));
+
+        commands.spawn((
+            MovingObjectBundle {
+                velocity: debris_velocity.clone(),
+                acceleration: Acceleration::new(acceleration.value * 0.1),
+                rotation: rotation.clone(),
+                collider: Collider::new(RADIUS),
+                model: SceneBundle {
+                    scene: SceneRoot(scene_assets.asteroid.clone()),
+                    transform: debris_xform,
+                },
+            },
+            AsteroidDebris,
         ));
 
     }
