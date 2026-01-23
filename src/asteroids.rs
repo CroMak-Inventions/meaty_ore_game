@@ -21,7 +21,7 @@ use crate::{
 
 
 const VELOCITY_SCALAR: f32 = 5.0;
-const ACCELERATION_SCALAR: f32 = 1.0;
+const ACCELERATION_SCALAR: f32 = 0.75;
 pub const SPAWN_RANGE_X: Range<f32> =  -25.0..25.0;
 pub const SPAWN_RANGE_Z: Range<f32> = -25.0..25.0;
 const SPAWN_TIME_SECONDS: f32 = 4.0;
@@ -131,7 +131,7 @@ fn spawn_asteroid(
         rng.random_range(SPAWN_RANGE_Z),
     );
 
-    for _i in 0..2 {
+    for _i in 0..4 {
         // It is a bit unfair to have an asteroid spawn right on top of the
         // spaceship.  So we allow a (finite) number of chances to choose
         // a different location if this happens.
@@ -165,6 +165,10 @@ fn spawn_asteroid(
         ).normalize_or_zero();
 
     let velocity = random_unit_vector() * VELOCITY_SCALAR;
+
+    // Technically, an asteroid would not have any significant acceleration,
+    // But having it gradually speed up over time adds some challenge to the
+    // gameplay.
     let acceleration = random_unit_vector() * ACCELERATION_SCALAR;
 
     commands.spawn((
