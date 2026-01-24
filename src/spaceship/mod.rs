@@ -219,7 +219,7 @@ fn spaceship_shield_controls(
         return;
     };
 
-    if keyboard_input.pressed(KeyCode::Tab) {
+    if keyboard_input.just_pressed(KeyCode::Tab) {
         commands.entity(spaceship).insert(SpaceshipShield);
     }
 }
