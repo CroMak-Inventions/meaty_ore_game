@@ -20,6 +20,8 @@ use crate::{
     state::GameState,
 };
 
+mod shield;
+
 
 const SPACESHIP_STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const SPACESHIP_STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
