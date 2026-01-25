@@ -22,7 +22,6 @@ use crate::{
 
 mod shield;
 
-
 const SPACESHIP_STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const SPACESHIP_STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
 pub const SPACESHIP_RADIUS: f32 = 2.5;
@@ -32,6 +31,8 @@ const SPACESHIP_ROTATION_SPEED: f32 = 2.5;
 const SPACESHIP_ROLL_SPEED: f32 = 2.5;
 const SPACESHIP_HEALTH: f32 = 100.0;
 const SPACESHIP_COLLISION_DAMAGE: f32 = 100.0;
+
+const SHIELD_COOLDOWN_SECS: f32 = 4.0;
 
 const MISSILE_FORWARD_SPAWN_SCALAR: f32 = 5.0;
 const MISSILE_RADIUS: f32 = 0.5;
@@ -46,16 +47,29 @@ const MISSILE_MAX: usize = 3;  // maximum number of missiles allowed in the air
 pub struct Spaceship;
 
 #[derive(Component, Debug)]
-pub struct SpaceshipShield;
+pub struct SpaceshipMissile;
 
 #[derive(Component, Debug)]
-pub struct SpaceshipMissile;
+pub struct ShieldController {
+    pub state: ShieldState,
+    pub cooldown: Timer,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShieldState {
+    Ready,
+    Active,
+    Cooldown,
+}
+
+/// One-frame intent marker inserted by input, consumed by shield systems.
+#[derive(Component, Debug)]
+pub struct ShieldRequest;
 
 #[derive(Resource, Debug)]
 pub struct MissileRateTimer {
     timer: Timer,
 }
-
 
 pub struct SpaceshipPlugin;
 
@@ -84,6 +98,7 @@ impl Plugin for SpaceshipPlugin {
         .add_systems(Update,
             despawn_missles.in_set(InGameSet::DespawnEntities),
         );
+        shield::register(app);
     }
 }
 
@@ -93,6 +108,9 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     ).with_scale(
         Vec3::ONE * SPACESHIP_SIZE
     );
+
+    let mut cooldown = Timer::from_seconds(SHIELD_COOLDOWN_SECS, TimerMode::Once);
+    cooldown.set_elapsed(cooldown.duration()); // mark finished
 
     commands.spawn((
         MovingObjectBundle {
@@ -106,6 +124,10 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
             }
         },
         Spaceship,
+        ShieldController {
+            state: ShieldState::Ready,
+            cooldown,
+        },
         Health::new(SPACESHIP_HEALTH),
         CollisionDamage::new(SPACESHIP_COLLISION_DAMAGE),
     ));
@@ -222,10 +244,9 @@ fn spaceship_shield_controls(
     };
 
     if keyboard_input.just_pressed(KeyCode::Tab) {
-        commands.entity(spaceship).insert(SpaceshipShield);
+        commands.entity(spaceship).insert(ShieldRequest);
     }
 }
-
 
 fn despawn_missles(
     mut commands: Commands,
