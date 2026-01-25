@@ -7,7 +7,7 @@ use crate::{
     saucer::{Saucer, SaucerMissile},
     schedule::InGameSet,
     sound_fx::AsteroidCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile}
+    spaceship::{Spaceship, SpaceshipMissile, Shield}
 };
 
 
@@ -61,6 +61,7 @@ impl Plugin for CollisionDetectionPlugin {
             (
                 (
                     dispatch_collistion_events::<Asteroid>,
+                    dispatch_collistion_events::<Shield>,
                     dispatch_collistion_events::<Spaceship>,
                     dispatch_collistion_events::<SpaceshipMissile>,
                     dispatch_collistion_events::<Saucer>,
@@ -135,45 +136,66 @@ pub fn handle_collision_event(
     mut health_query: Query<&mut Health>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
-    collision_damage_query: Query<&CollisionDamage>
+    collision_damage_query: Query<&CollisionDamage>,
+    shield_query: Query<&Shield>,
+    shield_owner_query: Query<&Shield>,
+    spaceship_query: Query<(), With<Spaceship>>,
 ) {
-    for &CollisionEvent {
-        entity,
-        collided_entity
-    } in collision_event_reader.read() {
-        // let's figure out the changes in health
+    for &CollisionEvent { entity, collided_entity } in collision_event_reader.read() {
+        // If the ship has an active shield, ignore collisions on the ship itself.
+        // The shield will receive its own collision events.
+        if spaceship_query.get(entity).is_ok() {
+            let ship_is_shielded = shield_query.iter().any(|s| s.ship == entity);
+            if ship_is_shielded {
+                continue;
+            }
+        }
+
+        // If the victim is a Shield, ignore collisions with its owning ship.
+        // Otherwise the ship's CollisionDamage will kill the shield immediately.
+        if let Ok(shield) = shield_query.get(entity) {
+            if collided_entity == shield.ship {
+                continue;
+            }
+        }
+
+        // Victim must have health
         let Ok(mut health) = health_query.get_mut(entity) else {
             continue;
         };
 
+        // Hitter must have collision damage
         let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
             continue;
         };
-
+        // apply damage
+        let before = health.value;
         health.value -= collision_damage.amount;
+        info!(
+            "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?}",
+            entity,
+            collision_damage.amount,
+            before,
+            health.value,
+            collided_entity
+        );
 
-        // now we send out a sound
+        // sound
         sound_event_writer.write(AsteroidCollisionSoundEvent);
 
-        // now we send out a collistion animation.  We only do this for missile
-        // collisions, which is why we query for the missile.
+        // collision animation only for missile/ship collisions
         let Ok(xform) = missile_query.get(entity) else {
             continue;
         };
 
-        let Ok((
-            velocity,
-            acceleration,
-        )) = asteroid_query.get(collided_entity) else {
+        let Ok((velocity, acceleration)) = asteroid_query.get(collided_entity) else {
             continue;
         };
 
-        animation_event_writer.write(
-            AsteroidCollisionAnimationEvent::new(
-                xform,
-                velocity,
-                acceleration,
-            )
-        );
+        animation_event_writer.write(AsteroidCollisionAnimationEvent::new(
+            xform,
+            velocity,
+            acceleration,
+        ));
     }
 }

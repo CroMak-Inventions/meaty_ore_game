@@ -73,6 +73,8 @@ pub struct MissileRateTimer {
 
 pub struct SpaceshipPlugin;
 
+pub use shield::Shield;
+
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(MissileRateTimer {
