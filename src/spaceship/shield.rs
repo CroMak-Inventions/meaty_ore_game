@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use bevy::pbr::{MeshMaterial3d, StandardMaterial};
+use bevy::render::alpha::AlphaMode;
+use bevy::platform::collections::HashMap;
 
 use crate::{asset_loader::SceneAssets, collision_detection::Collider, health::Health, schedule::InGameSet};
 use super::{ShieldController, ShieldRequest, ShieldState, Spaceship, SPACESHIP_RADIUS};
@@ -9,30 +12,35 @@ pub struct Shield {
     pub ship: Entity,
 }
 
+#[derive(Component, Debug, Default)]
+pub struct ShieldMaterialCache {
+    pub handles: Vec<Handle<StandardMaterial>>,
+}
+
+
 #[derive(Component, Debug)]
 pub struct ShieldHitCooldown {
     pub timer: Timer,
 }
 
 const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.20;
-
 const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 1.35;
 const SHIELD_VISUAL_SCALE: f32 = SHIELD_RADIUS; // because model diameter is 2.0
 const SHIELD_HP: f32 = 60.0;
+const SHIELD_BASE_ALPHA: f32 = 0.35; // tune: 0.25–0.45 feels good
+const SHIELD_MIN_ALPHA: f32 = 0.03;  // don’t go fully invisible until dead
 
 pub fn register(app: &mut App) {
-    app.add_systems(
-        Update,
-        (
-            consume_shield_request,
-            shield_follow_ship,
-            tick_shield_hit_cooldowns,
-            shield_death_starts_cooldown,
-            reconcile_shield_controller,
-            tick_shield_cooldown,
-        )
-        .in_set(InGameSet::EntityUpdates),
-    );
+    app.add_systems(Update, consume_shield_request.in_set(InGameSet::EntityUpdates));
+    app.add_systems(Update, shield_follow_ship.in_set(InGameSet::EntityUpdates));
+    app.add_systems(Update, tick_shield_hit_cooldowns.in_set(InGameSet::EntityUpdates));
+
+    app.add_systems(Update, shield_cache_materials.in_set(InGameSet::EntityUpdates));
+    app.add_systems(Update, shield_apply_alpha_from_health.in_set(InGameSet::EntityUpdates));
+
+    app.add_systems(Update, shield_death_starts_cooldown.in_set(InGameSet::EntityUpdates));
+    app.add_systems(Update, reconcile_shield_controller.in_set(InGameSet::EntityUpdates));
+    app.add_systems(Update, tick_shield_cooldown.in_set(InGameSet::EntityUpdates));
 }
 
 fn consume_shield_request(
@@ -122,7 +130,6 @@ fn tick_shield_cooldown(
 
         if controller.cooldown.is_finished() {
             controller.state = ShieldState::Ready;
-            info!("Shield cooldown complete: Cooldown -> Ready");
         }
     }
 
@@ -134,6 +141,80 @@ fn tick_shield_hit_cooldowns(
 ) {
     for mut cd in q.iter_mut() {
         cd.timer.tick(time.delta());
+    }
+}
+
+fn shield_cache_materials(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    shields: Query<Entity, (With<Shield>, Without<ShieldMaterialCache>)>,
+    // entities spawned by glTF that carry the material
+    mut mat_entities: Query<(Entity, &mut MeshMaterial3d<StandardMaterial>)>,
+    child_of_q: Query<(Entity, &ChildOf)>,
+) {
+    for shield_entity in shields.iter() {
+        // Build child -> parent map once
+        let mut parent_map: HashMap<Entity, Entity> = HashMap::new();
+        for (child_e, child_of) in child_of_q.iter() {
+            parent_map.insert(child_e, child_of.parent());
+        }
+
+        let is_descendant_of_shield = |mut e: Entity| -> bool {
+            while let Some(p) = parent_map.get(&e).copied() {
+                if p == shield_entity {
+                    return true;
+                }
+                e = p;
+            }
+            false
+        };
+
+        let mut cloned_handles: Vec<Handle<StandardMaterial>> = Vec::new();
+
+        for (e, mut mat3d) in mat_entities.iter_mut() {
+            if !is_descendant_of_shield(e) {
+                continue;
+            }
+
+            // Clone the material so we don't affect other glTF instances.
+            let Some(orig) = materials.get(mat3d.0.id()).cloned() else {
+                continue;
+            };
+
+            let mut new_mat = orig;
+            new_mat.alpha_mode = AlphaMode::Blend;
+
+            // Set initial alpha (full health)
+            let base = new_mat.base_color.to_srgba();
+            new_mat.base_color = Color::srgba(base.red, base.green, base.blue, SHIELD_BASE_ALPHA);
+
+            let new_handle = materials.add(new_mat);
+            mat3d.0 = new_handle.clone();
+            cloned_handles.push(new_handle);
+        }
+
+        commands
+            .entity(shield_entity)
+            .insert(ShieldMaterialCache { handles: cloned_handles });
+    }
+}
+
+fn shield_apply_alpha_from_health(
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    q: Query<(&Health, &ShieldMaterialCache), With<Shield>>,
+) {
+    for (health, cache) in q.iter() {
+        let t = (health.value / SHIELD_HP).clamp(0.0, 1.0);
+        let alpha = (SHIELD_MIN_ALPHA + (SHIELD_BASE_ALPHA - SHIELD_MIN_ALPHA) * t).clamp(0.0, 1.0);
+
+        for h in cache.handles.iter() {
+            if let Some(mat) = materials.get_mut(h.id()) {
+                let base = mat.base_color.to_srgba();
+                mat.base_color = Color::srgba(base.red, base.green, base.blue, alpha);
+                // keep blend (some materials may get overwritten by glTF defaults)
+                mat.alpha_mode = AlphaMode::Blend;
+            }
+        }
     }
 }
 
