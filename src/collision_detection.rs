@@ -7,7 +7,7 @@ use crate::{
     saucer::{Saucer, SaucerMissile},
     schedule::InGameSet,
     sound_fx::AsteroidCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile, Shield}
+    spaceship::{Spaceship, SpaceshipMissile, Shield, ShieldHitCooldown}
 };
 
 
@@ -134,16 +134,16 @@ pub fn handle_collision_event(
     mut sound_event_writer: MessageWriter<AsteroidCollisionSoundEvent>,
     mut animation_event_writer: MessageWriter<AsteroidCollisionAnimationEvent>,
     mut health_query: Query<&mut Health>,
+    mut shield_hit_cd_query: Query<&mut ShieldHitCooldown>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
     collision_damage_query: Query<&CollisionDamage>,
     shield_query: Query<&Shield>,
-    shield_owner_query: Query<&Shield>,
     spaceship_query: Query<(), With<Spaceship>>,
 ) {
     for &CollisionEvent { entity, collided_entity } in collision_event_reader.read() {
-        // If the ship has an active shield, ignore collisions on the ship itself.
-        // The shield will receive its own collision events.
+        // 1) If the ship has an active shield, ignore collisions on the ship itself.
+        //    The shield will receive its own collision events.
         if spaceship_query.get(entity).is_ok() {
             let ship_is_shielded = shield_query.iter().any(|s| s.ship == entity);
             if ship_is_shielded {
@@ -151,26 +151,38 @@ pub fn handle_collision_event(
             }
         }
 
-        // If the victim is a Shield, ignore collisions with its owning ship.
-        // Otherwise the ship's CollisionDamage will kill the shield immediately.
+        // 2) If the victim is a Shield, ignore collisions with its owning ship.
+        //    Otherwise the ship's CollisionDamage will kill the shield immediately.
         if let Ok(shield) = shield_query.get(entity) {
             if collided_entity == shield.ship {
                 continue;
             }
         }
 
-        // Victim must have health
+        // 3) If victim is a Shield, throttle how often it can take damage (i-frames).
+        //    Note: ShieldHitCooldown.timer must be ticked elsewhere each frame.
+        if let Ok(mut cd) = shield_hit_cd_query.get_mut(entity) {
+            if !cd.timer.is_finished() {
+                continue;
+            }
+            cd.timer.reset();
+        }
+
+        // 4) Victim must have health
         let Ok(mut health) = health_query.get_mut(entity) else {
             continue;
         };
 
-        // Hitter must have collision damage
+        // 5) Hitter must have collision damage
         let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
             continue;
         };
-        // apply damage
+
+        // 6) Apply damage
         let before = health.value;
         health.value -= collision_damage.amount;
+
+        // Temporary debug log (remove or gate behind a debug feature once verified)
         info!(
             "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?}",
             entity,
@@ -180,10 +192,10 @@ pub fn handle_collision_event(
             collided_entity
         );
 
-        // sound
+        // 7) Sound
         sound_event_writer.write(AsteroidCollisionSoundEvent);
 
-        // collision animation only for missile/ship collisions
+        // 8) Collision animation only for missile/ship collisions (per existing logic)
         let Ok(xform) = missile_query.get(entity) else {
             continue;
         };
