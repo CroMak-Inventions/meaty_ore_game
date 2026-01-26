@@ -49,18 +49,19 @@ pub struct Spaceship;
 #[derive(Component, Debug)]
 pub struct SpaceshipMissile;
 
-#[derive(Component, Debug)]
-pub struct ShieldController {
-    pub state: ShieldState,
-    pub cooldown: Timer,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShieldState {
     Ready,
     Active,
     Cooldown,
 }
+
+#[derive(Component, Debug)]
+pub struct ShieldController {
+    pub state: ShieldState,
+    pub cooldown: Timer,
+}
+
 
 /// One-frame intent marker inserted by input, consumed by shield systems.
 #[derive(Component, Debug)]

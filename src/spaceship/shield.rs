@@ -23,7 +23,9 @@ pub struct ShieldHitCooldown {
 }
 
 #[derive(Message, Debug)]
-pub struct ShieldReadyEvent;
+pub struct ShieldReadyEvent {
+    pub ship: Entity,
+}
 
 const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.20;
 const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 1.35;
@@ -41,7 +43,6 @@ pub fn register(app: &mut App) {
     app.add_systems(Update, shield_apply_alpha_from_health.in_set(InGameSet::EntityUpdates));
 
     app.add_systems(Update, shield_death_starts_cooldown.in_set(InGameSet::EntityUpdates));
-    app.add_systems(Update, reconcile_shield_controller.in_set(InGameSet::EntityUpdates));
     app.add_systems(Update, tick_shield_cooldown.in_set(InGameSet::EntityUpdates));
 
     app.add_message::<ShieldReadyEvent>();
@@ -120,12 +121,13 @@ fn shield_death_starts_cooldown(
     }
 }
 
+
 fn tick_shield_cooldown(
     time: Res<Time>,
-    mut q: Query<&mut ShieldController, With<Spaceship>>,
+    mut q: Query<(Entity, &mut ShieldController), With<Spaceship>>,
     mut shield_ready_writer: MessageWriter<ShieldReadyEvent>,
 ) {
-    let Ok(mut controller) = q.single_mut() else { return; };
+    let Ok((ship_e, mut controller)) = q.single_mut() else { return; };
 
     if controller.state != ShieldState::Cooldown {
         return;
@@ -135,10 +137,11 @@ fn tick_shield_cooldown(
 
     if controller.cooldown.just_finished() {
         controller.state = ShieldState::Ready;
-        info!("Shield cooldown complete: Cooldown -> Ready");
-        shield_ready_writer.write(ShieldReadyEvent);
+        info!("Shield cooldown complete: Cooldown -> Ready (ship={:?})", ship_e);
+        shield_ready_writer.write(ShieldReadyEvent { ship: ship_e });
     }
 }
+
 
 fn tick_shield_hit_cooldowns(
     time: Res<Time>,
@@ -220,20 +223,5 @@ fn shield_apply_alpha_from_health(
                 mat.alpha_mode = AlphaMode::Blend;
             }
         }
-    }
-}
-
-fn reconcile_shield_controller(
-    mut ship_q: Query<(Entity, &mut ShieldController), With<Spaceship>>,
-    shield_q: Query<&Shield>,
-) {
-    let Ok((ship_e, mut controller)) = ship_q.single_mut() else { return; };
-
-    let shield_exists = shield_q.iter().any(|s| s.ship == ship_e);
-
-    if controller.state == ShieldState::Active && !shield_exists {
-        controller.state = ShieldState::Cooldown;
-        controller.cooldown.reset();
-        info!("Shield missing while Active -> forcing Cooldown");
     }
 }

@@ -7,7 +7,7 @@ use crate::{
 };
 
 const SOUND_EFFECTS_VOLUME: audio::Volume = audio::Volume::Linear(0.8);
-const SHIELD_READY_VOLUME: audio::Volume = audio::Volume::Linear(0.75);
+const SHIELD_READY_VOLUME: audio::Volume = audio::Volume::Linear(1.2);
 
 
 #[derive(Component, Debug)]
@@ -113,20 +113,20 @@ fn play_meteor_collision_sound(
 fn play_shield_ready_sound(
     mut reader: MessageReader<ShieldReadyEvent>,
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    scene_assets: Res<SceneAssets>,
 ) {
-    let sfx: Handle<AudioSource> = asset_server.load("sound/Shoot-2.ogg"); // try this first
+    for ev in reader.read() {
+        info!("ShieldReadyEvent received (ship={:?})", ev.ship);
 
-    for _ in reader.read() {
         commands.spawn((
-            AudioPlayer::new(sfx.clone()),
+            AudioPlayer::new(scene_assets.shield_ready_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
                 volume: SHIELD_READY_VOLUME,
             },
         ));
+        info!("ShieldReadyEvent sound played");
     }
-    info!("ShieldReadyEvent sound played");
 }
 
 fn set_sound_fx_volume(
