@@ -3,9 +3,11 @@ use bevy::{audio, prelude::*};
 use crate::{
     asset_loader::SceneAssets,
     schedule::InGameSet,
+    spaceship::ShieldReadyEvent,
 };
 
 const SOUND_EFFECTS_VOLUME: audio::Volume = audio::Volume::Linear(0.8);
+const SHIELD_READY_VOLUME: audio::Volume = audio::Volume::Linear(0.75);
 
 
 #[derive(Component, Debug)]
@@ -38,11 +40,13 @@ impl Plugin for SoundFXPlugin {
                 play_shooting_sound,
                 play_saucer_shooting_sound,
                 play_meteor_collision_sound,
+                play_shield_ready_sound,
                 set_sound_fx_volume,
             ).in_set(InGameSet::EntityUpdates),
         )
         .add_message::<ShootingSoundEvent>()
         .add_message::<SaucerShootingSoundEvent>()
+        .add_message::<ShieldReadyEvent>()
         .add_message::<AsteroidCollisionSoundEvent>();
     }
 }
@@ -104,6 +108,25 @@ fn play_meteor_collision_sound(
             },
         ));
     }
+}
+
+fn play_shield_ready_sound(
+    mut reader: MessageReader<ShieldReadyEvent>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let sfx: Handle<AudioSource> = asset_server.load("sound/Shoot-2.ogg"); // try this first
+
+    for _ in reader.read() {
+        commands.spawn((
+            AudioPlayer::new(sfx.clone()),
+            GameSoundEffects {
+                volume_is_set: false,
+                volume: SHIELD_READY_VOLUME,
+            },
+        ));
+    }
+    info!("ShieldReadyEvent sound played");
 }
 
 fn set_sound_fx_volume(

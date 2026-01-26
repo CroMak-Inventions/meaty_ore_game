@@ -73,7 +73,7 @@ pub struct MissileRateTimer {
 
 pub struct SpaceshipPlugin;
 
-pub use shield::{Shield, ShieldHitCooldown};
+pub use shield::{Shield, ShieldHitCooldown, ShieldReadyEvent};
 
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {

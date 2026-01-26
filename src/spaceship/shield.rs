@@ -17,11 +17,13 @@ pub struct ShieldMaterialCache {
     pub handles: Vec<Handle<StandardMaterial>>,
 }
 
-
 #[derive(Component, Debug)]
 pub struct ShieldHitCooldown {
     pub timer: Timer,
 }
+
+#[derive(Message, Debug)]
+pub struct ShieldReadyEvent;
 
 const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.20;
 const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 1.35;
@@ -41,6 +43,8 @@ pub fn register(app: &mut App) {
     app.add_systems(Update, shield_death_starts_cooldown.in_set(InGameSet::EntityUpdates));
     app.add_systems(Update, reconcile_shield_controller.in_set(InGameSet::EntityUpdates));
     app.add_systems(Update, tick_shield_cooldown.in_set(InGameSet::EntityUpdates));
+
+    app.add_message::<ShieldReadyEvent>();
 }
 
 fn consume_shield_request(
@@ -116,23 +120,24 @@ fn shield_death_starts_cooldown(
     }
 }
 
-
 fn tick_shield_cooldown(
     time: Res<Time>,
     mut q: Query<&mut ShieldController, With<Spaceship>>,
+    mut shield_ready_writer: MessageWriter<ShieldReadyEvent>,
 ) {
-    let Ok(mut controller) = q.single_mut() else {
+    let Ok(mut controller) = q.single_mut() else { return; };
+
+    if controller.state != ShieldState::Cooldown {
         return;
-    };
-
-    if controller.state == ShieldState::Cooldown {
-        controller.cooldown.tick(time.delta());
-
-        if controller.cooldown.is_finished() {
-            controller.state = ShieldState::Ready;
-        }
     }
 
+    controller.cooldown.tick(time.delta());
+
+    if controller.cooldown.just_finished() {
+        controller.state = ShieldState::Ready;
+        info!("Shield cooldown complete: Cooldown -> Ready");
+        shield_ready_writer.write(ShieldReadyEvent);
+    }
 }
 
 fn tick_shield_hit_cooldowns(
