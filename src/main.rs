@@ -10,6 +10,7 @@ mod collision_detection;
 mod despawn;
 mod game_over;
 mod health;
+mod hud;
 mod lighting;
 mod movement;
 mod saucer;
@@ -30,6 +31,7 @@ use camera::CameraPlugin;
 use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
 use game_over::GameOverPlugin;
+use hud::HudPlugin;
 use lighting::LightingPlugin;
 use movement::MovementPlugin;
 use saucer::SaucerPlugin;
@@ -65,6 +67,7 @@ fn main() {
             // max 15 plugins in a tuple, so we split it up.
             StatePlugin,
             GameOverPlugin,
+            HudPlugin,
             #[cfg(feature = "debug")]
             DebugPlugin,
         ))
