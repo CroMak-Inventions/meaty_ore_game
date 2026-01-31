@@ -27,25 +27,29 @@ pub struct ShieldReadyEvent {
     pub ship: Entity,
 }
 
-const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.20;
-const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 1.35;
+const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.40;
+const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 2.0;
 const SHIELD_VISUAL_SCALE: f32 = SHIELD_RADIUS; // because model diameter is 2.0
 const SHIELD_HP: f32 = 60.0;
+const SHIELD_DECAY: f32 = 4.0;  // HP per second.
 const SHIELD_BASE_ALPHA: f32 = 0.35; // tune: 0.25–0.45 feels good
 const SHIELD_MIN_ALPHA: f32 = 0.03;  // don’t go fully invisible until dead
 
 pub fn register(app: &mut App) {
-    app.add_systems(Update, consume_shield_request.in_set(InGameSet::EntityUpdates));
-    app.add_systems(Update, shield_follow_ship.in_set(InGameSet::EntityUpdates));
-    app.add_systems(Update, tick_shield_hit_cooldowns.in_set(InGameSet::EntityUpdates));
-
-    app.add_systems(Update, shield_cache_materials.in_set(InGameSet::EntityUpdates));
-    app.add_systems(Update, shield_apply_alpha_from_health.in_set(InGameSet::EntityUpdates));
-
-    app.add_systems(Update, shield_death_starts_cooldown.in_set(InGameSet::EntityUpdates));
-    app.add_systems(Update, tick_shield_cooldown.in_set(InGameSet::EntityUpdates));
-
-    app.add_message::<ShieldReadyEvent>();
+    app.add_message::<ShieldReadyEvent>()
+    .add_systems(Update,
+        (
+            consume_shield_request,
+            shield_follow_ship,
+            tick_shield_hit_cooldowns,
+            shield_cache_materials,
+            shield_apply_alpha_from_health,
+            shield_decay_health,
+            shield_death_starts_cooldown,
+            tick_shield_cooldown,
+        )
+        .in_set(InGameSet::UserInput)
+    );
 }
 
 fn consume_shield_request(
@@ -222,6 +226,21 @@ fn shield_apply_alpha_from_health(
                 // keep blend (some materials may get overwritten by glTF defaults)
                 mat.alpha_mode = AlphaMode::Blend;
             }
+        }
+    }
+}
+
+fn shield_decay_health(
+    mut shield_q: Query<&mut Health, With<Shield>>,
+    time: Res<Time>,
+) {
+    // In the interest of fairness, we would like the shield to not be
+    // alive forever even if it doesn't get hit.  So we will make its health
+    // decay over time.  We would like the shield to last about 10-15 seconds.
+    for mut health in shield_q.iter_mut() {
+        let decay_value = SHIELD_DECAY * time.delta_secs();
+        if health.value > 0.0 {
+            health.value -= health.value.min(decay_value);
         }
     }
 }
