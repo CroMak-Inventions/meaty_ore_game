@@ -183,6 +183,7 @@ pub fn handle_collision_event(
         health.value -= collision_damage.amount;
 
         // Temporary debug log (remove or gate behind a debug feature once verified)
+        #[cfg(debug_assertions)]
         info!(
             "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?}",
             entity,
