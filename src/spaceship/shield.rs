@@ -27,10 +27,10 @@ pub struct ShieldReadyEvent {
     pub ship: Entity,
 }
 
-const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.40;
 const SHIELD_RADIUS: f32 = SPACESHIP_RADIUS * 2.0;
 const SHIELD_VISUAL_SCALE: f32 = SHIELD_RADIUS; // because model diameter is 2.0
 const SHIELD_HP: f32 = 60.0;
+const SHIELD_HIT_COOLDOWN_SECS: f32 = 0.40;
 const SHIELD_DECAY: f32 = 4.0;  // HP per second.
 const SHIELD_BASE_ALPHA: f32 = 0.35; // tune: 0.25–0.45 feels good
 const SHIELD_MIN_ALPHA: f32 = 0.03;  // don’t go fully invisible until dead
@@ -60,7 +60,7 @@ fn consume_shield_request(
     let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
 
     let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
-    hit_cd.set_elapsed(hit_cd.duration()); // start "ready to be hit"
+    hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
 
     match controller.state {
         ShieldState::Ready => {
@@ -141,7 +141,8 @@ fn tick_shield_cooldown(
 
     if controller.cooldown.just_finished() {
         controller.state = ShieldState::Ready;
-        info!("Shield cooldown complete: Cooldown -> Ready (ship={:?})", ship_e);
+        info!("Shield cooldown complete: Cooldown -> Ready (ship={:?}, elapsed={:?})",
+              ship_e, controller.cooldown.elapsed());
         shield_ready_writer.write(ShieldReadyEvent { ship: ship_e });
     }
 }
