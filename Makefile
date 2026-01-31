@@ -131,7 +131,10 @@ package-windows:
 # ======================================
 # Utilities
 # ======================================
-.PHONY: clean run run-debug
+.PHONY: test clean run run-debug
+
+check:
+	$(CARGO) check
 
 clean:
 	rm -rf target $(DIST)

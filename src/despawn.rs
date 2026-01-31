@@ -5,7 +5,7 @@ use crate::{
     health::Health,
     schedule::InGameSet,
     sound_fx::GameSoundEffects,
-    spaceship::Spaceship,
+    spaceship::{Spaceship, Shield},
     state::GameState
 };
 
@@ -46,7 +46,7 @@ fn despawn_far_away_entities<T: Component>(
 
 fn despawn_dead_entities(
     mut commands: Commands,
-    query: Query<(Entity, &Health)>
+    query: Query<(Entity, &Health), Without<Shield>>,
 ) {
     for (entity, health) in query.iter() {
         if health.value <= 0.0 {

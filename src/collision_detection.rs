@@ -7,7 +7,7 @@ use crate::{
     saucer::{Saucer, SaucerMissile},
     schedule::InGameSet,
     sound_fx::AsteroidCollisionSoundEvent,
-    spaceship::{Spaceship, SpaceshipMissile}
+    spaceship::{Spaceship, SpaceshipMissile, Shield, ShieldHitCooldown}
 };
 
 
@@ -61,6 +61,7 @@ impl Plugin for CollisionDetectionPlugin {
             (
                 (
                     dispatch_collistion_events::<Asteroid>,
+                    dispatch_collistion_events::<Shield>,
                     dispatch_collistion_events::<Spaceship>,
                     dispatch_collistion_events::<SpaceshipMissile>,
                     dispatch_collistion_events::<Saucer>,
@@ -133,47 +134,80 @@ pub fn handle_collision_event(
     mut sound_event_writer: MessageWriter<AsteroidCollisionSoundEvent>,
     mut animation_event_writer: MessageWriter<AsteroidCollisionAnimationEvent>,
     mut health_query: Query<&mut Health>,
+    mut shield_hit_cd_query: Query<&mut ShieldHitCooldown>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
-    collision_damage_query: Query<&CollisionDamage>
+    collision_damage_query: Query<&CollisionDamage>,
+    shield_query: Query<&Shield>,
+    spaceship_query: Query<(), With<Spaceship>>,
 ) {
-    for &CollisionEvent {
-        entity,
-        collided_entity
-    } in collision_event_reader.read() {
-        // let's figure out the changes in health
+    for &CollisionEvent { entity, collided_entity } in collision_event_reader.read() {
+        // 1) If the ship has an active shield, ignore collisions on the ship itself.
+        //    The shield will receive its own collision events.
+        if spaceship_query.get(entity).is_ok() {
+            let ship_is_shielded = shield_query.iter().any(|s| s.ship == entity);
+            if ship_is_shielded {
+                continue;
+            }
+        }
+
+        // 2) If the victim is a Shield, ignore collisions with its owning ship.
+        //    Otherwise the ship's CollisionDamage will kill the shield immediately.
+        if let Ok(shield) = shield_query.get(entity) {
+            if collided_entity == shield.ship {
+                continue;
+            }
+        }
+
+        // 3) If victim is a Shield, throttle how often it can take damage (i-frames).
+        //    Note: ShieldHitCooldown.timer must be ticked elsewhere each frame.
+        if let Ok(mut cd) = shield_hit_cd_query.get_mut(entity) {
+            if !cd.timer.is_finished() {
+                continue;
+            }
+            cd.timer.reset();
+        }
+
+        // 4) Victim must have health
         let Ok(mut health) = health_query.get_mut(entity) else {
             continue;
         };
 
+        // 5) Hitter must have collision damage
         let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
             continue;
         };
 
+        // 6) Apply damage
+        let before = health.value;
         health.value -= collision_damage.amount;
 
-        // now we send out a sound
+        // Temporary debug log (remove or gate behind a debug feature once verified)
+        info!(
+            "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?}",
+            entity,
+            collision_damage.amount,
+            before,
+            health.value,
+            collided_entity
+        );
+
+        // 7) Sound
         sound_event_writer.write(AsteroidCollisionSoundEvent);
 
-        // now we send out a collistion animation.  We only do this for missile
-        // collisions, which is why we query for the missile.
+        // 8) Collision animation only for missile/ship collisions (per existing logic)
         let Ok(xform) = missile_query.get(entity) else {
             continue;
         };
 
-        let Ok((
-            velocity,
-            acceleration,
-        )) = asteroid_query.get(collided_entity) else {
+        let Ok((velocity, acceleration)) = asteroid_query.get(collided_entity) else {
             continue;
         };
 
-        animation_event_writer.write(
-            AsteroidCollisionAnimationEvent::new(
-                xform,
-                velocity,
-                acceleration,
-            )
-        );
+        animation_event_writer.write(AsteroidCollisionAnimationEvent::new(
+            xform,
+            velocity,
+            acceleration,
+        ));
     }
 }

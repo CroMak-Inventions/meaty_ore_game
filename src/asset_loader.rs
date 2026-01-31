@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct SceneAssets {
     pub asteroid: Handle<Scene>,
     pub spaceship: Handle<Scene>,
+    pub shield: Handle<Scene>,
     pub saucer: Handle<Scene>,
     pub explosion: Handle<Scene>,
     pub missiles: Handle<Scene>,
@@ -12,6 +13,7 @@ pub struct SceneAssets {
     pub saucer_shooting_sound: Handle<AudioSource>,
     pub meteor_hit_sound: Handle<AudioSource>,
     pub thruster_sound: Handle<AudioSource>,
+    pub shield_ready_sound: Handle<AudioSource>,
     pub saucer_sound: Handle<AudioSource>,
     pub background_music: Handle<AudioSource>,
     pub font: Handle<Font>,
@@ -33,6 +35,7 @@ fn load_assets(
     *scene_assets = SceneAssets {
         asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
         spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("SpaceshipNew.glb")),
+        shield: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Shield.glb")),
         saucer: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Saucer.v2.glb")),
         explosion: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Explosion.glb")),
         missiles: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Bullet.glb")),
@@ -41,6 +44,7 @@ fn load_assets(
         saucer_shooting_sound: asset_server.load("sound/UFO-Lazer-Shoot.ogg"),
         meteor_hit_sound: asset_server.load("sound/MeteorHit-3.ogg"),
         thruster_sound: asset_server.load("sound/Rocket.ogg"),
+        shield_ready_sound: asset_server.load("sound/shield_ready.ogg"),
         saucer_sound: asset_server.load("sound/UFO-Saucer-SFX.ogg"),
         background_music: asset_server.load("sound/CryForMercyButTheClockTicksDown.ogg"),
         font: asset_server.load("fonts/fira-sans.bold.ttf"),
