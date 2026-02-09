@@ -59,11 +59,15 @@ fn consume_shield_request(
 ) {
     let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
 
-    let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
-    hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
-
     match controller.state {
         ShieldState::Ready => {
+            controller.state = ShieldState::Active;
+            
+            commands.entity(ship_entity).remove::<ShieldRequest>();
+            
+            let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
+            hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
+            
             commands.spawn((
                 Shield { ship: ship_entity },
                 ShieldHitCooldown { timer: hit_cd },
@@ -74,7 +78,6 @@ fn consume_shield_request(
                 GlobalTransform::default(),
             ));
 
-            controller.state = ShieldState::Active;
             info!("Shield spawned: Ready -> Active");
         }
         ShieldState::Active => {
@@ -84,8 +87,6 @@ fn consume_shield_request(
             info!("Shield requested during Cooldown (ignored)");
         }
     }
-
-    commands.entity(ship_entity).remove::<ShieldRequest>();
 }
 
 fn shield_follow_ship(
