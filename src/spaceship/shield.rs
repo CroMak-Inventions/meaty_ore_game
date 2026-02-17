@@ -3,8 +3,19 @@ use bevy::pbr::{MeshMaterial3d, StandardMaterial};
 use bevy::render::alpha::AlphaMode;
 use bevy::platform::collections::HashMap;
 
-use crate::{asset_loader::SceneAssets, collision_detection::Collider, health::Health, schedule::InGameSet};
-use super::{ShieldController, ShieldRequest, ShieldState, Spaceship, SPACESHIP_RADIUS};
+use crate::{
+    asset_loader::SceneAssets,
+    collision_detection::Collider,
+    health::Health,
+    schedule::InGameSet,
+};
+use super::{
+    ShieldController,
+    ShieldRequestEvent,
+    ShieldState,
+    Spaceship,
+    SPACESHIP_RADIUS,
+};
 
 
 #[derive(Component, Debug)]
@@ -41,50 +52,53 @@ pub fn register(app: &mut App) {
         (
             consume_shield_request,
             shield_follow_ship,
+            shield_death_starts_cooldown,
+            tick_shield_cooldown,
             tick_shield_hit_cooldowns,
             shield_cache_materials,
             shield_apply_alpha_from_health,
             shield_decay_health,
-            shield_death_starts_cooldown,
-            tick_shield_cooldown,
         )
         .in_set(InGameSet::UserInput)
     );
 }
 
 fn consume_shield_request(
+    mut shield_request_reader: MessageReader<ShieldRequestEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
-    mut q: Query<(Entity, &mut ShieldController), (With<Spaceship>, With<ShieldRequest>)>,
+    mut q: Query<(Entity, &mut ShieldController), With<Spaceship>>,
 ) {
-    let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
 
-    match controller.state {
-        ShieldState::Ready => {
-            controller.state = ShieldState::Active;
-            
-            commands.entity(ship_entity).remove::<ShieldRequest>();
-            
-            let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
-            hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
-            
-            commands.spawn((
-                Shield { ship: ship_entity },
-                ShieldHitCooldown { timer: hit_cd },
-                Health::new(SHIELD_HP),
-                Collider::new(SHIELD_RADIUS),
-                SceneRoot(scene_assets.shield.clone()),
-                Transform::default(),
-                GlobalTransform::default(),
-            ));
-
-            info!("Shield spawned: Ready -> Active");
-        }
-        ShieldState::Active => {
-            info!("Shield requested while Active (toggle TBD)");
-        }
-        ShieldState::Cooldown => {
-            info!("Shield requested during Cooldown (ignored)");
+    for _ in shield_request_reader.read() {
+        // spawn our shield if not already present
+        let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
+    
+        match controller.state {
+            ShieldState::Ready => {
+                controller.state = ShieldState::Active;
+                
+                let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
+                hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
+                
+                commands.spawn((
+                    Shield { ship: ship_entity },
+                    ShieldHitCooldown { timer: hit_cd },
+                    Health::new(SHIELD_HP),
+                    Collider::new(SHIELD_RADIUS),
+                    SceneRoot(scene_assets.shield.clone()),
+                    Transform::default(),
+                    GlobalTransform::default(),
+                ));
+    
+                info!("Shield spawned: Ready -> Active");
+            }
+            ShieldState::Active => {
+                info!("Shield requested while Active (toggle TBD)");
+            }
+            ShieldState::Cooldown => {
+                info!("Shield requested during Cooldown (ignored)");
+            }
         }
     }
 }

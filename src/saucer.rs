@@ -47,7 +47,7 @@ pub struct SaucerMissile;
 
 #[derive(Resource, Debug)]
 pub struct SaucerSpawnTimer {
-    timer: Timer,
+    pub timer: Timer,
 }
 
 #[derive(Resource, Debug)]

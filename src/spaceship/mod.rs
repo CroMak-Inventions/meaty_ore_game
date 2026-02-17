@@ -63,9 +63,10 @@ pub struct ShieldController {
 }
 
 
-/// One-frame intent marker inserted by input, consumed by shield systems.
-#[derive(Component, Debug)]
-pub struct ShieldRequest;
+// message for requesting a shield during gameplay
+#[derive(Message, Debug)]
+pub struct ShieldRequestEvent;
+
 
 #[derive(Resource, Debug)]
 pub struct MissileRateTimer {
@@ -84,6 +85,7 @@ impl Plugin for SpaceshipPlugin {
                 TimerMode::Once,
             )
         })
+        .add_message::<ShieldRequestEvent>()
         .add_systems(PostStartup, spawn_spaceship)
         .add_systems(OnEnter(GameState::GameOver), spawn_spaceship)
         .add_systems(Update,
@@ -93,7 +95,6 @@ impl Plugin for SpaceshipPlugin {
                 spaceship_shield_controls,
                 spaceship_thruster_sound_control,
             )
-            .chain()
             .in_set(InGameSet::UserInput)
         )
         .add_systems(Update,
@@ -238,16 +239,12 @@ fn spaceship_weapon_controls(
 
 
 fn spaceship_shield_controls(
-    mut commands: Commands,
-    query: Query<Entity, With<Spaceship>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut shield_request_writer: MessageWriter<ShieldRequestEvent>,
 ) {
-    let Ok(spaceship) = query.single() else {
-        return;
-    };
-
     if keyboard_input.just_pressed(KeyCode::Tab) {
-        commands.entity(spaceship).insert(ShieldRequest);
+        // commands.entity(spaceship).insert(ShieldRequest);
+        shield_request_writer.write(ShieldRequestEvent);
     }
 }
 

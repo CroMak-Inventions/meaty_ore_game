@@ -7,7 +7,8 @@ use bevy::{
 use crate::{
     ambient_sound::ThrusterSound,
     asset_loader::SceneAssets,
-    state::GameState
+    saucer::SaucerSpawnTimer,
+    state::GameState,
 };
 
 #[derive(Component, Debug)]
@@ -24,11 +25,12 @@ impl Plugin for GameOverPlugin {
             show_game_over_dlg,
             mute_thruster_sound,
         ))
-        .add_systems(OnEnter(GameState::StartGame),
-            hide_game_over_dlg
-        )
+        .add_systems(OnEnter(GameState::StartGame), (
+            hide_game_over_dlg,
+            reset_saucer_spawn_timer,
+        ))
         .add_systems(Update,
-            hit_any_key.run_if(in_state(GameState::GameOver)),
+            quit_or_start_new_game.run_if(in_state(GameState::GameOver)),
         )
         .add_systems(OnEnter(GameState::QuitGame),
         quit_game
@@ -119,19 +121,32 @@ fn mute_thruster_sound(
     sink.set_volume(Volume::Linear(0.0));
 }
 
+// Show the game over dialog.
+// We do this when the game is over.
 fn show_game_over_dlg(
     mut game_over_dlg: Single<&mut Node, With<GameOverDlg>>,
 ) {
     game_over_dlg.top = Val::Percent(0.0);
 }
 
+// Hide the game over dialog.
+// We do this when we start a new game.
 fn hide_game_over_dlg(
     mut game_over_dlg: Single<&mut Node, With<GameOverDlg>>,
 ) {
     game_over_dlg.top = Val::Percent(-100.0);
 }
 
-fn hit_any_key(
+fn reset_saucer_spawn_timer(
+    mut spawn_timer: ResMut<SaucerSpawnTimer>,
+) {
+    spawn_timer.timer.reset();
+
+}
+
+// After the game is over, we need to receive the instructions to either
+// quit or restart a new game.
+fn quit_or_start_new_game(
     mut game_state: ResMut<NextState<GameState>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
