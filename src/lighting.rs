@@ -12,6 +12,7 @@ impl Plugin for LightingPlugin {
 
 fn spawn_point_light(mut commands: Commands) {
     commands.spawn((
+       Name::new("lighting"),
        DirectionalLight {
             illuminance: light_consts::lux::FULL_DAYLIGHT,
             shadows_enabled: true,

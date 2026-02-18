@@ -33,6 +33,7 @@ fn spawn_score(
     scene_assets: Res<SceneAssets>,
 ) {
     commands.spawn((
+        Name::new("score_text"),
         Node {
             position_type: PositionType::Absolute,
             top: Val::Percent(2.0),
@@ -67,6 +68,7 @@ fn spawn_score(
     ));
 
     commands.spawn((
+        Name::new("high_score_text"),
         // We could also use a `UiTargetCamera` component here instead of the general `IsDefaultUiCamera`.
         Node {
             position_type: PositionType::Absolute,
@@ -101,6 +103,7 @@ fn spawn_score(
     ));
 
     commands.spawn((
+        Name::new("last_score_text"),
         // We could also use a `UiTargetCamera` component here instead of the general `IsDefaultUiCamera`.
         Node {
             position_type: PositionType::Absolute,

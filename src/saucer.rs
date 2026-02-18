@@ -96,10 +96,11 @@ fn trigger_spawn_saucer(
     time: Res<Time>,
 ) {
     spawn_timer.timer.tick(time.delta());
+
     if !spawn_timer.timer.just_finished() {
         return;
     }
-    println!("\tSpawn Saucer...");
+
     saucer_spawn_event_writer.write(SaucerSpawnEvent);
 }
 
@@ -146,7 +147,8 @@ fn handle_saucer_spawn_event(
             Quat::from_rotation_x(std::f32::consts::PI / 2.)
         );
 
-        commands.spawn((
+        let _saucer_id = commands.spawn((
+            Name::new("saucer"),
             MovingObjectBundle {
                 velocity: Velocity::new(SAUCER_STARTING_VELOCITY),
                 acceleration: Acceleration::new(Vec3::ZERO),
@@ -164,7 +166,11 @@ fn handle_saucer_spawn_event(
             Saucer,
             Health::new(SAUCER_HEALTH),
             CollisionDamage::new(SAUCER_COLLISION_DAMAGE),
-        ));
+        )).id();
+        
+        #[cfg(debug_assertions)]
+        info!("\tSpawned Saucer ({:?})", _saucer_id);
+
     }
 }
 
@@ -254,6 +260,7 @@ fn saucer_weapon_control(
                 missile_xform.translation += missile_xform.forward() * SAUCER_MISSILE_FORWARD_SPAWN_SCALAR;
 
                 commands.spawn((
+                    Name::new("saucer_missile"),
                     MovingObjectBundle {
                         velocity: Velocity::new(missile_xform.forward() * SAUCER_MISSILE_SPEED),
                         acceleration: Acceleration::new(Vec3::ZERO),

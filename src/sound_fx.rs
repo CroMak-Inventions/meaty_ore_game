@@ -69,6 +69,7 @@ fn play_shooting_sound(
 ) {
     for _ in sound_event_reader.read() {
         commands.spawn((
+            Name::new("shooting_sound"),
             AudioPlayer::new(scene_assets.shooting_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
@@ -85,6 +86,7 @@ fn play_saucer_shooting_sound(
 ) {
     for _ in sound_event_reader.read() {
         commands.spawn((
+            Name::new("saucer_shooting_sound"),
             AudioPlayer::new(scene_assets.saucer_shooting_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
@@ -101,6 +103,7 @@ fn play_meteor_collision_sound(
 ) {
     for _ in sound_event_reader.read() {
         commands.spawn((
+            Name::new("meteor_hit_sound"),
             AudioPlayer::new(scene_assets.meteor_hit_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
@@ -115,16 +118,20 @@ fn play_shield_ready_sound(
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {
-    for ev in reader.read() {
-        info!("ShieldReadyEvent received (ship={:?})", ev.ship);
+    for _ev in reader.read() {
+        #[cfg(debug_assertions)]
+        info!("ShieldReadyEvent received (ship={:?})", _ev.ship);
 
         commands.spawn((
+            Name::new("shield_ready_sound"),
             AudioPlayer::new(scene_assets.shield_ready_sound.clone()),
             GameSoundEffects {
                 volume_is_set: false,
                 volume: SHIELD_READY_VOLUME,
             },
         ));
+
+        #[cfg(debug_assertions)]
         info!("ShieldReadyEvent sound played");
     }
 }

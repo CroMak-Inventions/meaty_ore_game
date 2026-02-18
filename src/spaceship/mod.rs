@@ -117,6 +117,7 @@ fn spawn_spaceship(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     cooldown.set_elapsed(cooldown.duration()); // mark finished
 
     commands.spawn((
+        Name::new("spaceship"),
         MovingObjectBundle {
             velocity: Velocity::new(SPACESHIP_STARTING_VELOCITY),
             acceleration: Acceleration::new(Vec3::ZERO),
@@ -217,6 +218,7 @@ fn spaceship_weapon_controls(
             missile_xform.rotate(spaceship_xform.rotation);
 
             commands.spawn((
+                Name::new("spaceship_missile"),
                 MovingObjectBundle {
                     velocity: Velocity::new(-spaceship_xform.forward() * MISSILE_SPEED),
                     acceleration: Acceleration::new(Vec3::ZERO),

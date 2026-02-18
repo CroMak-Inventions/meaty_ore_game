@@ -28,6 +28,7 @@ fn spawn_ambient_sound(
     scene_assets: Res<SceneAssets>,
 ) {
     commands.spawn((
+        Name::new("background_music"),
         AudioPlayer::new(scene_assets.background_music.clone()),
         PlaybackSettings {
             mode: PlaybackMode::Loop,
@@ -38,6 +39,7 @@ fn spawn_ambient_sound(
     ));
 
     commands.spawn((
+        Name::new("thruster_sound"),
         AudioPlayer::new(scene_assets.thruster_sound.clone()),
         PlaybackSettings {
             mode: PlaybackMode::Loop,
@@ -48,6 +50,7 @@ fn spawn_ambient_sound(
     ));
 
     commands.spawn((
+        Name::new("soucer_sound"),
         AudioPlayer::new(scene_assets.saucer_sound.clone()),
         PlaybackSettings {
             mode: PlaybackMode::Loop,

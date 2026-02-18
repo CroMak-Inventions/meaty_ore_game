@@ -137,7 +137,7 @@ pub fn handle_collision_event(
     mut shield_hit_cd_query: Query<&mut ShieldHitCooldown>,
     asteroid_query: Query<(&Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
-    collision_damage_query: Query<&CollisionDamage>,
+    collision_damage_query: Query<(&CollisionDamage, &Name)>,
     shield_query: Query<&Shield>,
     spaceship_query: Query<(), With<Spaceship>>,
 ) {
@@ -155,7 +155,21 @@ pub fn handle_collision_event(
         //    Otherwise the ship's CollisionDamage will kill the shield immediately.
         if let Ok(shield) = shield_query.get(entity) {
             if collided_entity == shield.ship {
+                #[cfg(debug_assertions)]
+                info!(
+                    "Damage: collided_entity({:?}) is shield.ship({:?})",
+                    collided_entity,
+                    shield.ship,
+                );
                 continue;
+            }
+            else {
+                #[cfg(debug_assertions)]
+                info!(
+                    "Damage: collided_entity({:?}) is not shield.ship({:?})",
+                    collided_entity,
+                    shield.ship,
+                );
             }
         }
 
@@ -174,23 +188,24 @@ pub fn handle_collision_event(
         };
 
         // 5) Hitter must have collision damage
-        let Ok(collision_damage) = collision_damage_query.get(collided_entity) else {
+        let Ok((collision_damage, _collided_name)) = collision_damage_query.get(collided_entity) else {
             continue;
         };
 
         // 6) Apply damage
-        let before = health.value;
+        let _before = health.value;
         health.value -= collision_damage.amount;
 
         // Temporary debug log (remove or gate behind a debug feature once verified)
         #[cfg(debug_assertions)]
         info!(
-            "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?}",
+            "Damage: entity={:?} took {:.1} ({} -> {}) from collided_entity={:?} ({:?})",
             entity,
             collision_damage.amount,
-            before,
+            _before,
             health.value,
-            collided_entity
+            collided_entity,
+            _collided_name
         );
 
         // 7) Sound

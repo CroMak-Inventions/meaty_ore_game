@@ -69,19 +69,19 @@ fn consume_shield_request(
     scene_assets: Res<SceneAssets>,
     mut q: Query<(Entity, &mut ShieldController), With<Spaceship>>,
 ) {
-
     for _ in shield_request_reader.read() {
         // spawn our shield if not already present
         let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
-    
+
         match controller.state {
             ShieldState::Ready => {
                 controller.state = ShieldState::Active;
-                
+
                 let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
                 hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
-                
+
                 commands.spawn((
+                    Name::new("shield"),
                     Shield { ship: ship_entity },
                     ShieldHitCooldown { timer: hit_cd },
                     Health::new(SHIELD_HP),
@@ -90,13 +90,19 @@ fn consume_shield_request(
                     Transform::default(),
                     GlobalTransform::default(),
                 ));
-    
-                info!("Shield spawned: Ready -> Active");
+
+                #[cfg(debug_assertions)]
+                info!(
+                    "Shield spawned for ship {:?}: Ready -> Active",
+                    ship_entity,
+                );
             }
             ShieldState::Active => {
+                #[cfg(debug_assertions)]
                 info!("Shield requested while Active (toggle TBD)");
             }
             ShieldState::Cooldown => {
+                #[cfg(debug_assertions)]
                 info!("Shield requested during Cooldown (ignored)");
             }
         }
@@ -128,12 +134,16 @@ fn shield_death_starts_cooldown(
 ) {
     for (shield_entity, health, shield) in shield_q.iter() {
         if health.value <= 0.0 {
+            #[cfg(debug_assertions)]
             info!("Shield died: entity={:?}", shield_entity);
+
             commands.entity(shield_entity).despawn();
 
             if let Ok(mut controller) = ship_q.get_mut(shield.ship) {
                 controller.state = ShieldState::Cooldown;
                 controller.cooldown.reset();
+
+                #[cfg(debug_assertions)]
                 info!("Shield died: Active -> Cooldown");
             }
         }
@@ -156,8 +166,14 @@ fn tick_shield_cooldown(
 
     if controller.cooldown.just_finished() {
         controller.state = ShieldState::Ready;
-        info!("Shield cooldown complete: Cooldown -> Ready (ship={:?}, elapsed={:?})",
-              ship_e, controller.cooldown.elapsed());
+
+        #[cfg(debug_assertions)]
+        info!(
+            "Shield cooldown complete: Cooldown -> Ready (ship={:?}, elapsed={:?})",
+            ship_e,
+            controller.cooldown.elapsed()
+        );
+
         shield_ready_writer.write(ShieldReadyEvent { ship: ship_e });
     }
 }

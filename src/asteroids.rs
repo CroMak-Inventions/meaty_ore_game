@@ -107,12 +107,12 @@ fn spawn_asteroids(
 
     if asteroids.iter().len() == 0 {
         // All asteroids have been cleared.  New level.
-        println!("New level: {:}", app_globals.level);
+        #[cfg(debug_assertions)]
+        info!("New level: {:}", app_globals.level);
+
         app_globals.level += 1;
 
-        // Spawn a new wave of asteroids.
         for _i in 0..10 {
-            // spawn an asteroid
             spawn_asteroid(&mut commands, &spaceship_xform, &scene_assets.asteroid);
         }
     }
@@ -172,6 +172,7 @@ fn spawn_asteroid(
     let acceleration = random_unit_vector() * ACCELERATION_SCALAR;
 
     commands.spawn((
+        Name::new("asteroid"),
         MovingObjectBundle {
             velocity: Velocity { value: velocity },
             acceleration: Acceleration { value: acceleration },
@@ -222,6 +223,7 @@ fn spawn_collision_animation(
         );
 
         commands.spawn((
+            Name::new("explosion"),
             MovingObjectBundle {
                 velocity: velocity.clone(),
                 acceleration: Acceleration::from(acceleration.clone()),
@@ -237,6 +239,7 @@ fn spawn_collision_animation(
         ));
 
         commands.spawn((
+            Name::new("asteroid_debris"),
             MovingObjectBundle {
                 velocity: debris_velocity.clone(),
                 acceleration: Acceleration::new(acceleration.value * 0.1),
