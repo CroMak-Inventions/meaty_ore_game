@@ -143,9 +143,7 @@ fn handle_saucer_spawn_event(
     for _spawn_event in event_reader.read() {
         let saucer_xform = Transform::from_translation(translation)
         .with_scale(Vec3::ONE * SAUCER_SIZE)
-        .with_rotation(
-            Quat::from_rotation_x(std::f32::consts::PI / 2.)
-        );
+        .with_rotation(Quat::from_rotation_x(std::f32::consts::PI / 2.));
 
         let _saucer_id = commands.spawn((
             Name::new("saucer"),

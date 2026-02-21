@@ -67,18 +67,21 @@ fn consume_shield_request(
     mut shield_request_reader: MessageReader<ShieldRequestEvent>,
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
-    mut q: Query<(Entity, &mut ShieldController), With<Spaceship>>,
+    mut ship_q: Query<(Entity, &mut ShieldController, &GlobalTransform), With<Spaceship>>,
 ) {
     for _ in shield_request_reader.read() {
         // spawn our shield if not already present
-        let Ok((ship_entity, mut controller)) = q.single_mut() else { return; };
+        let Ok((ship_entity, mut controller, ship_gt)) = ship_q.single_mut() else { return; };
 
         match controller.state {
             ShieldState::Ready => {
                 controller.state = ShieldState::Active;
-
+                
                 let mut hit_cd = Timer::from_seconds(SHIELD_HIT_COOLDOWN_SECS, TimerMode::Once);
                 hit_cd.set_elapsed(hit_cd.duration());  // start "ready to be hit"
+                
+                let shield_xform = Transform::from_translation(ship_gt.translation());
+                let shield_gt = GlobalTransform::from(shield_xform);
 
                 commands.spawn((
                     Name::new("shield"),
@@ -87,8 +90,8 @@ fn consume_shield_request(
                     Health::new(SHIELD_HP),
                     Collider::new(SHIELD_RADIUS),
                     SceneRoot(scene_assets.shield.clone()),
-                    Transform::default(),
-                    GlobalTransform::default(),
+                    shield_xform,
+                    shield_gt,
                 ));
 
                 #[cfg(debug_assertions)]
