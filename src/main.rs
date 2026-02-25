@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-mod ambient_sound;
 mod app_globals;
 mod app_setup;
 mod asset_loader;
@@ -16,13 +15,12 @@ mod movement;
 mod saucer;
 mod schedule;
 mod score_text;
-mod sound_fx;
+mod sound;
 mod spaceship;
 mod state;
 #[cfg(feature = "debug")]
 mod debug;
 
-use ambient_sound::AmbientSoundPlugin;
 use app_globals::AppGlobalsPlugin;
 use app_setup::AppSetupPlugin;
 use asset_loader::AssetLoaderPlugin;
@@ -37,7 +35,7 @@ use movement::MovementPlugin;
 use saucer::SaucerPlugin;
 use schedule::SchedulePlugin;
 use score_text::ScorePlugin;
-use sound_fx::SoundFXPlugin;
+use sound::SoundPlugin;
 use spaceship::SpaceshipPlugin;
 use state::StatePlugin;
 #[cfg(feature = "debug")]
@@ -59,8 +57,7 @@ fn main() {
             DespawnPlugin,
             SchedulePlugin,
             LightingPlugin,
-            SoundFXPlugin,
-            AmbientSoundPlugin,
+            SoundPlugin,
             ScorePlugin,
         ))
         .add_plugins((

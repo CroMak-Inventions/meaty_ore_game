@@ -4,7 +4,7 @@ use crate::{
     asteroids::Asteroid,
     health::Health,
     schedule::InGameSet,
-    sound_fx::GameSoundEffects,
+    sound::effects::GameSoundEffects,
     spaceship::{Spaceship, Shield},
     state::GameState
 };

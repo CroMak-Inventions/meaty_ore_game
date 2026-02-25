@@ -5,7 +5,7 @@ use bevy::{
 };
 
 use crate::{
-    ambient_sound::ThrusterSound,
+    sound::ambient::ThrusterSound,
     asset_loader::SceneAssets,
     saucer::SaucerSpawnTimer,
     state::GameState,

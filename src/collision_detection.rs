@@ -6,7 +6,7 @@ use crate::{
     movement::{Acceleration, Velocity},
     saucer::{Saucer, SaucerMissile},
     schedule::InGameSet,
-    sound_fx::AsteroidCollisionSoundEvent,
+    sound::effects::AsteroidCollisionSoundEvent,
     spaceship::{Spaceship, SpaceshipMissile, Shield, ShieldHitCooldown}
 };
 

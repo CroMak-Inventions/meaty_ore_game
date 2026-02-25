@@ -5,7 +5,7 @@ use bevy::{
 use rand::Rng;
 
 use crate::{
-    ambient_sound::SaucerSound,
+    sound::ambient::SaucerSound,
     asset_loader::SceneAssets,
     asteroids::{Asteroid, SPAWN_RANGE_X, SPAWN_RANGE_Z},
     collision_detection::{Collider, CollisionDamage},
@@ -19,7 +19,7 @@ use crate::{
     },
     schedule::InGameSet,
     spaceship::Spaceship,
-    sound_fx::SaucerShootingSoundEvent,
+    sound::effects::SaucerShootingSoundEvent,
 };
 
 

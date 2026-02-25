@@ -3,8 +3,9 @@ use bevy::{
     audio::Volume,
 };
 
+
 use crate::{
-    ambient_sound::ThrusterSound,
+    sound::ambient::ThrusterSound,
     asset_loader::SceneAssets,
     collision_detection::{Collider, CollisionDamage},
     health::Health,
@@ -16,7 +17,7 @@ use crate::{
         Velocity,
     },
     schedule::InGameSet,
-    sound_fx::ShootingSoundEvent,
+    sound::effects::ShootingSoundEvent,
     state::GameState,
 };
 
