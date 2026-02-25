@@ -46,22 +46,27 @@ const SHIELD_DECAY: f32 = 4.0;  // HP per second.
 const SHIELD_BASE_ALPHA: f32 = 0.35; // tune: 0.25–0.45 feels good
 const SHIELD_MIN_ALPHA: f32 = 0.03;  // don’t go fully invisible until dead
 
-pub fn register(app: &mut App) {
-    app.add_message::<ShieldReadyEvent>()
-    .add_systems(Update,
-        (
-            consume_shield_request,
-            shield_follow_ship,
-            shield_death_starts_cooldown,
-            tick_shield_cooldown,
-            tick_shield_hit_cooldowns,
-            shield_cache_materials,
-            shield_apply_alpha_from_health,
-            shield_decay_health,
-        )
-        .in_set(InGameSet::UserInput)
-    );
+pub struct ShieldPlugin;
+
+impl Plugin for ShieldPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_message::<ShieldReadyEvent>()
+        .add_systems(Update,
+            (
+                consume_shield_request,
+                shield_follow_ship,
+                shield_death_starts_cooldown,
+                tick_shield_cooldown,
+                tick_shield_hit_cooldowns,
+                shield_cache_materials,
+                shield_apply_alpha_from_health,
+                shield_decay_health,
+            )
+            .in_set(InGameSet::UserInput)
+        );        
+    }
 }
+
 
 fn consume_shield_request(
     mut shield_request_reader: MessageReader<ShieldRequestEvent>,

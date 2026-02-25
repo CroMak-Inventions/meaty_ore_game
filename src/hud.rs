@@ -3,7 +3,12 @@ use bevy::prelude::*;
 use crate::{
     asset_loader::SceneAssets,
     health::Health,
-    spaceship::{Shield, ShieldController, ShieldState, Spaceship},
+    spaceship::{
+        shield::Shield,
+        ShieldController,
+        ShieldState,
+        Spaceship,
+    },
     schedule::InGameSet,
 };
 

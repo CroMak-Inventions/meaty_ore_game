@@ -21,7 +21,8 @@ use crate::{
     state::GameState,
 };
 
-mod shield;
+pub mod shield;
+use shield::{ShieldPlugin};
 
 const SPACESHIP_STARTING_TRANSLATION: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 const SPACESHIP_STARTING_VELOCITY: Vec3 = Vec3::new(0.0, 0.0, 1.0);
@@ -74,9 +75,8 @@ pub struct MissileRateTimer {
     timer: Timer,
 }
 
-pub struct SpaceshipPlugin;
 
-pub use shield::{Shield, ShieldHitCooldown, ShieldReadyEvent};
+pub struct SpaceshipPlugin;
 
 impl Plugin for SpaceshipPlugin {
     fn build(&self, app: &mut App) {
@@ -86,6 +86,9 @@ impl Plugin for SpaceshipPlugin {
                 TimerMode::Once,
             )
         })
+        .add_plugins((
+            ShieldPlugin,
+        ))
         .add_message::<ShieldRequestEvent>()
         .add_systems(PostStartup, spawn_spaceship)
         .add_systems(OnEnter(GameState::GameOver), spawn_spaceship)
@@ -103,7 +106,6 @@ impl Plugin for SpaceshipPlugin {
         .add_systems(Update,
             despawn_missles.in_set(InGameSet::DespawnEntities),
         );
-        shield::register(app);
     }
 }
 

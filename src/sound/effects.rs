@@ -3,7 +3,7 @@ use bevy::{audio, prelude::*};
 use crate::{
     asset_loader::SceneAssets,
     schedule::InGameSet,
-    spaceship::ShieldReadyEvent,
+    spaceship::shield::ShieldReadyEvent,
 };
 
 const SOUND_EFFECTS_VOLUME: audio::Volume = audio::Volume::Linear(0.8);

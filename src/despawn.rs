@@ -5,7 +5,10 @@ use crate::{
     health::Health,
     schedule::InGameSet,
     sound::effects::GameSoundEffects,
-    spaceship::{Spaceship, Shield},
+    spaceship::{
+        Spaceship,
+        shield::Shield,
+    },
     state::GameState
 };
 
