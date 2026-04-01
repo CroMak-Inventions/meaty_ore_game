@@ -28,3 +28,4 @@ been added.
 - Last score is displayed in the top-right.
 - High score is displayed in the top-center.
 - Asteroids are spawned in waves, making it more challenging.
+- Periodically, a flying saucer appears, flying around & shooting at the spaceship.
