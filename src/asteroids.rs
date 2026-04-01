@@ -246,7 +246,7 @@ fn spawn_collision_animation(
                 rotation: rotation.clone(),
                 collider: Collider::new(RADIUS),
                 model: SceneBundle {
-                    scene: SceneRoot(scene_assets.asteroid.clone()),
+                    scene: SceneRoot(scene_assets.asteroid_debris.clone()),
                     transform: debris_xform,
                 },
             },
