@@ -68,7 +68,7 @@ pub static ASTEROID_LEVEL_PROPS: [LazyLock<AsteroidSpawnProperties>; 3] = [
             1,  // Medium asteroid
             String::from("asteroid_medium"),
             5.0,
-            0.75,
+            0.5,
             -25.0..25.0,
             -25.0..25.0,
             2.5,
