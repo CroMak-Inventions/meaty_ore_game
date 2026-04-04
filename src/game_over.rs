@@ -43,6 +43,7 @@ fn spawn_game_over_dlg(
     scene_assets: Res<SceneAssets>,
 ) {
     commands.spawn((
+        Name::new("game_over_dlg"),
         Node {
             left: Val::Px(0.0),
             top: Val::Percent(-100.0),

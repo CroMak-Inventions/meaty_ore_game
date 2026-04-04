@@ -7,7 +7,10 @@ use rand::Rng;
 use crate::{
     sound::ambient::SaucerSound,
     asset_loader::SceneAssets,
-    asteroids::{Asteroid, SPAWN_RANGE_X, SPAWN_RANGE_Z},
+    asteroids::{
+        Asteroid,
+        levels::ASTEROID_LEVEL_PROPS,
+    },
     collision_detection::{Collider, CollisionDamage},
     health::Health,
     movement::{
@@ -111,12 +114,13 @@ fn handle_saucer_spawn_event(
     spaceship_xform: Single<&Transform, With<Spaceship>>,
     scene_assets: Res<SceneAssets>,
 ) {
+    let spawn_props = &ASTEROID_LEVEL_PROPS[0];
     let mut rng = rand::rng();
 
     let mut translation = Vec3::new(
-        rng.random_range(SPAWN_RANGE_X),
+        rng.random_range(spawn_props.spawn_range_x.clone()),
         0.0,
-        rng.random_range(SPAWN_RANGE_Z),
+        rng.random_range(spawn_props.spawn_range_z.clone()),
     );
 
     for _i in 0..2 {
@@ -133,9 +137,9 @@ fn handle_saucer_spawn_event(
         }
         else {
             translation = Vec3::new(
-                rng.random_range(SPAWN_RANGE_X),
+                rng.random_range(spawn_props.spawn_range_x.clone()),
                 0.0,
-                rng.random_range(SPAWN_RANGE_Z),
+                rng.random_range(spawn_props.spawn_range_z.clone()),
             );
         }
     }

@@ -3,6 +3,8 @@ use bevy::prelude::*;
 #[derive(Resource, Debug, Default)]
 pub struct SceneAssets {
     pub asteroid: Handle<Scene>,
+    pub asteroid_medium: Handle<Scene>,
+    pub asteroid_big: Handle<Scene>,
     pub asteroid_debris: Handle<Scene>,
     pub spaceship: Handle<Scene>,
     pub shield: Handle<Scene>,
@@ -34,8 +36,10 @@ fn load_assets(
     asset_server: Res<AssetServer>
 ) {
     *scene_assets = SceneAssets {
-        asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0-New.glb")),
-        asteroid_debris: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-Debris-New.glb")),
+        asteroid: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-0.glb")),
+        asteroid_medium: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-1.glb")),
+        asteroid_big: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-2.glb")),
+        asteroid_debris: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Rock-Debris.glb")),
         spaceship: asset_server.load(GltfAssetLabel::Scene(0).from_asset("SpaceshipNew.glb")),
         shield: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Shield.glb")),
         saucer: asset_server.load(GltfAssetLabel::Scene(0).from_asset("Saucer.v2.glb")),

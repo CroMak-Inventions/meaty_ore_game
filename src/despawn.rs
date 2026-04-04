@@ -1,15 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    asteroids::Asteroid,
-    health::Health,
-    schedule::InGameSet,
-    sound::effects::GameSoundEffects,
-    spaceship::{
+    asteroids::{Asteroid, AsteroidSpawnChildrenEvent}, health::Health, movement::{Acceleration, Rotation, Velocity}, schedule::InGameSet, sound::effects::GameSoundEffects, spaceship::{
         Spaceship,
         shield::Shield,
-    },
-    state::GameState
+    }, state::GameState
 };
 
 const DESPAWN_DISTANCE: f32 = 100.0;
@@ -49,10 +44,38 @@ fn despawn_far_away_entities<T: Component>(
 
 fn despawn_dead_entities(
     mut commands: Commands,
-    query: Query<(Entity, &Health), Without<Shield>>,
+    mut spawn_children_event_writer: MessageWriter<AsteroidSpawnChildrenEvent>,
+    query: Query<(Entity, &Health, &Name), Without<Shield>>,
+    asteroid_query: Query<(&Asteroid, &Transform, &Velocity, &Rotation, &Acceleration)>
 ) {
-    for (entity, health) in query.iter() {
+    for (
+        entity,
+        health,
+        name
+    ) in query.iter() {
         if health.value <= 0.0 {
+            if name.contains("asteroid") {
+                
+                for (
+                    asteroid,
+                    xform,
+                    velocity,
+                    rotation,
+                    acceleration
+                ) in asteroid_query.get(entity).iter() {
+                    spawn_children_event_writer.write(
+                        AsteroidSpawnChildrenEvent::new(
+                            xform,
+                            velocity,
+                            rotation,
+                            acceleration,
+                            asteroid.level
+                        )
+                    );
+                }
+
+            }
+
             commands.entity(entity).despawn();
         }
     }
