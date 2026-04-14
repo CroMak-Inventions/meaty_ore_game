@@ -9,7 +9,7 @@ use crate::{
     asset_loader::SceneAssets,
     asteroids::{
         Asteroid,
-        levels::ASTEROID_LEVEL_PROPS,
+        levels::ASTEROID_SIZE_PROPS,
     },
     collision_detection::{Collider, CollisionDamage},
     health::Health,
@@ -114,7 +114,7 @@ fn handle_saucer_spawn_event(
     spaceship_xform: Single<&Transform, With<Spaceship>>,
     scene_assets: Res<SceneAssets>,
 ) {
-    let spawn_props = &ASTEROID_LEVEL_PROPS[0];
+    let spawn_props = &ASTEROID_SIZE_PROPS[0];
     let mut rng = rand::rng();
 
     let mut translation = Vec3::new(

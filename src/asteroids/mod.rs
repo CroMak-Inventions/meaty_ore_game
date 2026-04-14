@@ -1,7 +1,7 @@
-use std::{f32::consts::PI, ops::Range};
+use std::f32::consts::PI;
 
 use bevy::prelude::*;
-use rand::{Rng, rand_core::le};
+use rand::Rng;
 
 use crate::{
     app_globals::AppGlobals,
@@ -20,7 +20,7 @@ use crate::{
 };
 
 pub mod levels;
-use levels::ASTEROID_LEVEL_PROPS;
+use levels::ASTEROID_SIZE_PROPS;
 
 // Normal meteor constant values
 const SPAWN_TIME_SECONDS: f32 = 4.0;
@@ -142,71 +142,35 @@ fn spawn_asteroids(
         //#[cfg(debug_assertions)]
         info!("New level: {:}", app_globals.level);
         
-        // If we did this correctly, we should get
-        // lvl = [0, 0, 0, 1, 2, 2, ...]
-        let mut lvl = app_globals.level as f32;
-        lvl = if lvl > 2.0 {lvl - 2.0} else {1.0};
-        let lvl = (3.0 - (3.0 / lvl)) as i32;
+        let mut m_sizes: Vec<usize> = Vec::new();
 
-
-        match lvl {
-            1 => boss_wave(&mut commands, spaceship_xform, scene_assets),
-            2 => mixed_wave(&mut commands, spaceship_xform, scene_assets),
-            _ => normal_wave(&mut commands, spaceship_xform, scene_assets),
+        match app_globals.level - 1 {
+            0 | 1 => m_sizes.extend([0, 0, 0, 0, 0, 0, 0, 0, 0, 0].iter()),
+            2 => m_sizes.extend([1, 1, 1, 1].iter()),
+            3 | 4 => m_sizes.extend([1, 1, 1, 1, 0, 0, 0, 0].iter()),
+            5 => m_sizes.extend([2, 2].iter()),
+            _ => m_sizes.extend([2, 1, 1, 1, 0, 0, 0, 0, 0, 0].iter()),
         }
+
+        spawn_new_wave(&m_sizes, &mut commands, spaceship_xform, scene_assets);
 
         app_globals.level += 1;
     }
 }
 
-fn normal_wave(
+
+fn spawn_new_wave(
+    meteor_sizes: &[usize],
     mut commands: &mut Commands,
     spaceship_xform: Single<&Transform, With<Spaceship>>,
     scene_assets: Res<SceneAssets>,
 ) {
-    //info!("Normal level.");
-    for _i in 0..10 {
+    for meteor_size in meteor_sizes {
         spawn_random_asteroid(
             &mut commands,
             &spaceship_xform,
             &scene_assets,
-            0
-        );
-    }
-}
-
-
-fn boss_wave(
-    mut commands: &mut Commands,
-    spaceship_xform: Single<&Transform, With<Spaceship>>,
-    scene_assets: Res<SceneAssets>,
-) {
-    //info!("Boss level.");
-    for _i in 0..2 {
-        spawn_random_asteroid(
-            &mut commands,
-            &spaceship_xform,
-            &scene_assets,
-            2
-        );
-    }
-}
-
-
-fn mixed_wave(
-    mut commands: &mut Commands,
-    spaceship_xform: Single<&Transform, With<Spaceship>>,
-    scene_assets: Res<SceneAssets>,
-) {
-    //info!("Mixed level.");
-    let levels: [usize; 10] = [2, 2, 1, 1, 0, 0, 0, 0, 0, 0];
-
-    for level in levels {
-        spawn_random_asteroid(
-            &mut commands,
-            &spaceship_xform,
-            &scene_assets,
-            level,
+            *meteor_size,
         );
     }
 }
@@ -223,7 +187,7 @@ fn spawn_random_asteroid(
         level = 2;
     }
 
-    let spawn_props = &ASTEROID_LEVEL_PROPS[level];
+    let spawn_props = &ASTEROID_SIZE_PROPS[level];
 
     let scene: Handle<Scene>;
     if level >= 2 {
@@ -317,7 +281,7 @@ fn spawn_collision_animation(
     mut commands: Commands,
     scene_assets: Res<SceneAssets>,
 ) {
-    let spawn_props = &ASTEROID_LEVEL_PROPS[0];
+    let spawn_props = &ASTEROID_SIZE_PROPS[0];
 
     for &AsteroidCollisionAnimationEvent {
         xform,
@@ -397,7 +361,7 @@ fn split_asteroid(
         if level >= 1 {
             let new_level = if level >= 1 {level - 1} else {level};
 
-            let spawn_props = &ASTEROID_LEVEL_PROPS[new_level];
+            let spawn_props = &ASTEROID_SIZE_PROPS[new_level];
 
             let scene: Handle<Scene>;
 

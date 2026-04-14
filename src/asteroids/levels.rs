@@ -1,5 +1,6 @@
 use std::{
-    ops::Range, str::FromStr, sync::LazyLock
+    ops::Range,
+    sync::LazyLock
 };
 
 
@@ -45,10 +46,10 @@ impl AsteroidSpawnProperties {
 }
 
 
-// This is an array of properties we will use to spawn asteroids at
-// different levels.  This allows us to split larger asteroids into
-// progressively smaller asteroids.
-pub static ASTEROID_LEVEL_PROPS: [LazyLock<AsteroidSpawnProperties>; 3] = [
+// This is an array of properties we will use to spawn asteroids at different
+// sizes.  This allows us to split larger asteroids into progressively smaller
+// asteroids.  Right now we have the big, medium, and small asteroid sizes.
+pub static ASTEROID_SIZE_PROPS: [LazyLock<AsteroidSpawnProperties>; 3] = [
     LazyLock::new(|| {
         AsteroidSpawnProperties::new(
             0,  // standard small asteroid
@@ -73,7 +74,7 @@ pub static ASTEROID_LEVEL_PROPS: [LazyLock<AsteroidSpawnProperties>; 3] = [
             -25.0..25.0,
             2.5,
             3.0,
-            60.0,
+            40.0,
             70.0,
         )
     }),
@@ -87,7 +88,7 @@ pub static ASTEROID_LEVEL_PROPS: [LazyLock<AsteroidSpawnProperties>; 3] = [
             -25.0..25.0,
             2.0,
             4.2,
-            100.0,
+            80.0,
             140.0,
         )
     }),
