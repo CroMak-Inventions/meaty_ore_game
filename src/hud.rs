@@ -43,7 +43,7 @@ fn spawn_hud_bars(mut commands: Commands, scene_assets: Res<SceneAssets>) {
     commands
         .spawn(Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(130.0),
+            left: Val::Px(150.0),
             top: Val::Px(16.0),
             display: Display::Flex,
             flex_direction: FlexDirection::Column,

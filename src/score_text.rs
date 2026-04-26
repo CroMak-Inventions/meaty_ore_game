@@ -38,7 +38,7 @@ fn spawn_score(
             position_type: PositionType::Absolute,
             top: Val::Percent(2.0),
             left: Val::Percent(2.0),
-            width: Val::Percent(20.),
+            width: Val::Percent(22.),
             height: Val::Percent(5.),
             display: Display::Flex,
             justify_content: JustifyContent::Center,
