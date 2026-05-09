@@ -4,6 +4,7 @@ mod app_globals;
 mod app_setup;
 mod asset_loader;
 mod asteroids;
+mod background;
 mod camera;
 mod collision_detection;
 mod despawn;
@@ -25,6 +26,7 @@ use app_globals::AppGlobalsPlugin;
 use app_setup::AppSetupPlugin;
 use asset_loader::AssetLoaderPlugin;
 use asteroids::AsteroidPlugin;
+use background::BackgroundPlugin;
 use camera::CameraPlugin;
 use collision_detection::CollisionDetectionPlugin;
 use despawn::DespawnPlugin;
@@ -48,6 +50,7 @@ fn main() {
             AppSetupPlugin,
             AppGlobalsPlugin,
             AssetLoaderPlugin,
+            BackgroundPlugin,  // we get a big shadow over everything when we turn this on.
             MovementPlugin,
             SpaceshipPlugin,
             AsteroidPlugin,
@@ -58,10 +61,10 @@ fn main() {
             SchedulePlugin,
             LightingPlugin,
             SoundPlugin,
-            ScorePlugin,
         ))
         .add_plugins((
             // max 15 plugins in a tuple, so we split it up.
+            ScorePlugin,
             StatePlugin,
             GameOverPlugin,
             HudPlugin,

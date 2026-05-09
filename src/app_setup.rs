@@ -8,7 +8,7 @@ impl Plugin for AppSetupPlugin {
     fn build(&self, app: &mut App) {
         // System defined plugings
         app.insert_resource(ClearColor(Color::linear_rgb(0.0005,0.0,0.005)))
-            .insert_resource(AmbientLight {
+            .insert_resource(GlobalAmbientLight {
                 color: Color::default(),
                 brightness: 250.0,
                 affects_lightmapped_meshes: true
