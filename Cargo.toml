@@ -8,8 +8,9 @@ include = ["/assets/**"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.18.1"
+bevy = { version = "0.18.1", features = ["bevy_dev_tools"] }
 rand = "0.9.4"
+
 
 # Enable a small amount of optimization in debug mode.
 [profile.dev]

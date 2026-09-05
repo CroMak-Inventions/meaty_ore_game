@@ -139,7 +139,7 @@ pub fn handle_collision_event(
     mut animation_event_writer: MessageWriter<AsteroidCollisionAnimationEvent>,
     mut health_query: Query<&mut Health>,
     mut shield_hit_cd_query: Query<&mut ShieldHitCooldown>,
-    asteroid_query: Query<(&Velocity, &Acceleration)>,
+    physics: Query<(&mut Velocity, &Acceleration)>,
     missile_query: Query<&Transform, Or<(With<Spaceship>, With<SpaceshipMissile>)>>,
     collision_damage_query: Query<(&CollisionDamage, &Name)>,
     shield_query: Query<&Shield>,
@@ -194,12 +194,12 @@ pub fn handle_collision_event(
         // 5) Hitter must have collision damage
         let Ok((collision_damage, _collided_name)) = collision_damage_query.get(collided_entity) else {
             continue;
-        };
-
+        };    
+        
         // 6) Apply damage
         let _before = health.value;
         health.value -= collision_damage.amount;
-
+        
         // Temporary debug log (remove or gate behind a debug feature once verified)
         #[cfg(debug_assertions)]
         info!(
@@ -212,21 +212,26 @@ pub fn handle_collision_event(
             _collided_name
         );
 
-        // 7) Sound
+        // 7) minor Billiards effect
+        // Fix: I feel there must be a more efficient way to do this, but I
+        //      keep running into errors trying to do multiple successive
+        //      get_mut()'s on the same physics_query.
+
+        // 8) Sound
         sound_event_writer.write(AsteroidCollisionSoundEvent);
 
-        // 8) Collision animation only for missile/ship collisions (per existing logic)
+        // 9) Collision animation only for missile/ship collisions (per existing logic)
         let Ok(xform) = missile_query.get(entity) else {
             continue;
         };
 
-        let Ok((velocity, acceleration)) = asteroid_query.get(collided_entity) else {
+        let Ok((velocity, acceleration)) = physics.get(collided_entity) else {
             continue;
         };
 
         animation_event_writer.write(AsteroidCollisionAnimationEvent::new(
             xform,
-            velocity,
+            &velocity,
             acceleration,
         ));
     }
